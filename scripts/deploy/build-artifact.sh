@@ -18,9 +18,10 @@ npm run typecheck
 npm run build
 test -f .next/standalone/server.js; test -f .next/BUILD_ID; test -d .next/static; test -d public
 cp -a .next/standalone/. "$release_dir/"
-mkdir -p "$release_dir/.next"; cp -a .next/static "$release_dir/.next/static"; cp -a .next/BUILD_ID "$release_dir/.next/BUILD_ID"; cp -a public "$release_dir/public"; cp scripts/deploy/standalone-start.cjs "$release_dir/start.js"
+mkdir -p "$release_dir/.next"; cp -a .next/static "$release_dir/.next/static"; cp -a .next/BUILD_ID "$release_dir/.next/BUILD_ID"; cp -a public "$release_dir/public"; cp -a database "$release_dir/database"; cp scripts/deploy/standalone-start.cjs "$release_dir/start.js"; cp scripts/deploy/production-migrate.cjs "$release_dir/migrate.js"
 node scripts/deploy/generate-manifest.mjs "$release_dir" "$release_dir/ARTIFACT-MANIFEST.json" "$git_sha" "$build_timestamp"
-if find "$release_dir" -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.sql' \) -print -quit | grep -q .; then echo "Forbidden private input found in release." >&2; exit 1; fi
+if find "$release_dir" -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' \) -print -quit | grep -q .; then echo "Forbidden private input found in release." >&2; exit 1; fi
+if find "$release_dir" -type f -name '*.sql' ! -path "$release_dir/database/migrations/*" -print -quit | grep -q .; then echo "A database export was found outside the approved migration directory." >&2; exit 1; fi
 cd "$work_dir"; tar -czf "$artifact_dir/$artifact_name" -C "$release_dir" .; cd "$artifact_dir"; sha256sum "$artifact_name" > "$artifact_name.sha256"
 artifact_sha="$(cut -d ' ' -f 1 "$artifact_name.sha256")"; artifact_bytes="$(stat -c '%s' "$artifact_name")"
 node -e 'const fs=require("node:fs"); const [source,target,name,sha,bytes]=process.argv.slice(1); const data=JSON.parse(fs.readFileSync(source,"utf8")); data.artifact={name,bytes:Number(bytes),sha256:sha}; fs.writeFileSync(target,JSON.stringify(data,null,2)+"\n");' "$release_dir/ARTIFACT-MANIFEST.json" "$artifact_dir/$artifact_name.manifest.json" "$artifact_name" "$artifact_sha" "$artifact_bytes"

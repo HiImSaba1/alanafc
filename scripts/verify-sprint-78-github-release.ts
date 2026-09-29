@@ -9,6 +9,7 @@ const runtime = read("scripts/deploy/verify-runtime.sh");
 const verify = read("scripts/deploy/verify-artifact.sh");
 const manifest = read("scripts/deploy/generate-manifest.mjs");
 const startup = read("scripts/deploy/standalone-start.cjs");
+const productionMigration = read("scripts/deploy/production-migrate.cjs");
 const health = read("src/app/api/health/live/route.ts");
 const push = read("scripts/push-github-release.ps1");
 if (!config.includes('output: "standalone"')) throw new Error("Next standalone output is not enabled.");
@@ -17,6 +18,7 @@ if (!build.includes("git archive") || !build.includes("npm ci --legacy-peer-deps
 if (!verify.includes("ARTIFACT-MANIFEST.json") || !verify.includes("Archive contains a forbidden path") || !manifest.includes('glibcTarget = "2.28"')) throw new Error("Artifact integrity/native compatibility checks are incomplete.");
 if (!runtime.includes("/api/health/live") || !runtime.includes('service":"alanafc-web') || !health.includes('service: "alanafc-web"')) throw new Error("Database-independent runtime smoke test is incomplete.");
 if (!startup.includes(".env.production.local") || !startup.includes('require("./server.js")')) throw new Error("Plesk standalone startup adapter is incomplete.");
+if (!build.includes('cp -a database "$release_dir/database"') || !build.includes('production-migrate.cjs "$release_dir/migrate.js"') || !verify.includes("./database/migrations/") || !productionMigration.includes("DATABASE_NAME") || !productionMigration.includes("migrationsFolder") || !productionMigration.includes("No application data was imported or replaced")) throw new Error("Migration-only production upgrade support is incomplete.");
 if (workflow.includes("ssh") || workflow.includes("DATABASE_PASSWORD") || workflow.includes("SMTP_PASSWORD")) throw new Error("The build workflow must not deploy or contain production secrets.");
 if (!push.includes("sprint-78.ps1")) throw new Error("Git publication does not require the latest release verification.");
 process.stdout.write(`${JSON.stringify({ ok: true, workflow: "Build Alana FC Papaki standalone release", node: "22.23.2", glibcCeiling: "2.28", artifact: "alanafc-papaki-linux-release", automaticDeployment: false, writesPerformed: false }, null, 2)}\n`);

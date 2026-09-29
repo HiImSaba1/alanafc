@@ -14,7 +14,7 @@ const publicSecurityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
-  serverExternalPackages: ["@node-rs/argon2"],
+  serverExternalPackages: ["@node-rs/argon2", "drizzle-orm", "mysql2"],
   experimental: {
     cpus: 1,
     serverActions: { bodySizeLimit: "14mb" },

@@ -8,6 +8,6 @@ After the Action is green, open its run and download the artifact named `alanafc
 - `alanafc-papaki-next-build.tar.gz.sha256`
 - `alanafc-papaki-next-build.tar.gz.manifest.json`
 
-The TAR contains a Linux-built standalone application and `start.js`. It never contains `.env.production.local`, database exports, Git metadata, tests, or reports.
+The TAR contains a Linux-built standalone application, `start.js`, `migrate.js`, and the reviewed Drizzle migration directory. It never contains `.env.production.local`, database exports, Git metadata, tests, or reports.
 
-Deployment remains manual: preserve the live `.env.production.local` and `public/uploads/media`, keep a rollback copy of the active release, extract the verified TAR into a new release directory, then switch/restart through Plesk or the documented SSH promotion procedure. The GitHub workflow never connects to Papaki.
+Deployment remains manual: export a rollback backup of the live database, preserve `.env.production.local` and `public/uploads/media`, extract the verified TAR into a new release directory, copy the private environment file into it, run `node migrate.js`, and only then switch/restart through Plesk or the documented SSH promotion procedure. `migrate.js` applies schema migrations only; it does not import a local dump. The GitHub workflow never connects to Papaki.

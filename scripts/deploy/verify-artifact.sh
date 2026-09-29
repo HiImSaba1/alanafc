@@ -7,7 +7,8 @@ checksum_file="$artifact.sha256"
 cd "$(dirname "$artifact")"
 sha256sum --check "$(basename "$checksum_file")"
 listing="$(tar -tzf "$(basename "$artifact")")"
-for required in './start.js' './server.js' './package.json' './.next/BUILD_ID' './.next/static/' './public/' './ARTIFACT-MANIFEST.json'; do grep -Fq "$required" <<<"$listing" || { echo "Missing required entry: $required" >&2; exit 1; }; done
+for required in './start.js' './migrate.js' './server.js' './package.json' './.next/BUILD_ID' './.next/static/' './public/' './database/migrations/' './ARTIFACT-MANIFEST.json'; do grep -Fq "$required" <<<"$listing" || { echo "Missing required entry: $required" >&2; exit 1; }; done
 if grep -Eq '(^|/)(\.git|node_modules/\.cache|\.env($|\.)|playwright-report|test-results|artifacts)(/|$)' <<<"$listing"; then echo "Archive contains a forbidden path." >&2; exit 1; fi
+if grep -E '\.sql$' <<<"$listing" | grep -Ev '^\./database/migrations/' | grep -q .; then echo "Archive contains a database export outside the migration directory." >&2; exit 1; fi
 if awk -F/ 'BEGIN{bad=0} /(^|\/)\.\.($|\/)|^\// {bad=1} END{exit bad ? 0 : 1}' <<<"$listing"; then echo "Archive contains an unsafe path." >&2; exit 1; fi
 echo "Artifact integrity and content checks passed."
