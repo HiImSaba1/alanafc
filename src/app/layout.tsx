@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       lang="el"
       className={`${alanaSans.variable} ${alanaMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <script id="academy-structured-data" type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeStructuredData(academyStructuredData()) }} />
         <SiteChrome site={ownerContent.site}>{children}</SiteChrome>
       </body>

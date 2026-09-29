@@ -23,7 +23,10 @@ test("visitors can review and change their saved cookie choice", async ({ page }
   await expect(preferenceControl).toContainText("Απόρριψη");
   await expect.poll(() => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "null")?.choice, consentKey)).toBe("declined");
 
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" }));
+  await expect.poll(() => page.evaluate(() => Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 2)).toBe(true);
   const footerSettings = page.getByRole("button", { name: "Ρυθμίσεις Cookies" });
+  await expect(footerSettings).toBeVisible();
   await footerSettings.click();
   await expect(dialog).toBeVisible();
   await expect(dialog).toBeFocused();

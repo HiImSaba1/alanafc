@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { EditorialButton } from "@/components/ui/editorial-button";
 import { COOKIE_CONSENT_KEY, loadCookieConsent, type CookieConsentChoice } from "@/features/consent/cookie-consent-storage";
 
@@ -25,6 +26,6 @@ export function CookiePreferencesButton({ compact = false }: { compact?: boolean
     window.dispatchEvent(new CustomEvent("alana:cookie-consent-changed", { detail: null }));
     window.dispatchEvent(new Event("alana:open-cookie-preferences"));
   };
-  if (compact) return <button type="button" className="footer-cookie-settings" onClick={reopen}><span className="footer-roll"><span>Ρυθμίσεις Cookies</span><span aria-hidden="true">Ρυθμίσεις Cookies</span></span></button>;
+  if (compact) return <button type="button" className="footer-cookie-settings" onClick={reopen}><span className="footer-roll"><span>Ρυθμίσεις Cookies</span><span aria-hidden="true">Ρυθμίσεις Cookies</span></span><ArrowUpRight aria-hidden="true" /></button>;
   return <div className="cookie-preference-control"><p aria-live="polite">Αποθηκευμένη επιλογή: <strong>{choice === "accepted" ? "Αποδοχή" : choice === "declined" ? "Απόρριψη" : "Δεν έχει οριστεί"}</strong></p><EditorialButton label="Αλλαγή επιλογής" arrow="right" variant="outline" onClick={reopen} /></div>;
 }

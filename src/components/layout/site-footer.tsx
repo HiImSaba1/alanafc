@@ -38,10 +38,24 @@ export function SiteFooter({ site }: { site: OwnerPublicSite }) {
     <footer ref={root} className="site-footer space-y-10">
       <div className="site-footer__top">
         <div><p data-footer-reveal className="eyebrow">{site.footerEyebrow}</p><h2 data-footer-reveal>{site.footerTitle}</h2><div data-footer-reveal><EditorialButton href={site.footerButtonHref} label={site.footerButtonLabel} arrow="right" variant="light" /></div></div>
-        <nav aria-label="Πλοήγηση υποσέλιδου">{site.navigation.filter((item) => item.enabled).map((item) => <Link data-footer-reveal href={item.href} key={item.href}><span className="footer-roll"><span>{item.label}</span><span aria-hidden="true">{item.label}</span></span><ArrowUpRight /></Link>)}</nav>
+        <div className="site-footer__links">
+          <p className="site-footer__column-label" data-footer-reveal>Quick Links</p>
+          <nav aria-label="Πλοήγηση υποσέλιδου">{site.navigation.filter((item) => item.enabled).map((item) => <Link data-footer-reveal href={item.href} key={item.href}><span className="footer-roll"><span>{item.label}</span><span aria-hidden="true">{item.label}</span></span><ArrowUpRight /></Link>)}</nav>
+        </div>
+        <div className="site-footer__legal">
+          <p className="site-footer__column-label" data-footer-reveal>Νομικά</p>
+          <nav aria-label="Νομικές πληροφορίες">
+            {siteConfig.legalNavigation.map((item) => <Link data-footer-reveal href={item.href} key={item.href}><span className="footer-roll"><span>{item.label}</span><span aria-hidden="true">{item.label}</span></span><ArrowUpRight /></Link>)}
+            <CookiePreferencesButton compact />
+          </nav>
+        </div>
       </div>
       <div className="site-footer__wordmark" data-footer-reveal aria-label="Alana FC Academy">{site.footerWordmark}</div>
-      <div className="site-footer__bottom"><span>© {new Date().getFullYear()} ALANA FC ACADEMY</span><a href={`mailto:${site.email}`}><span className="footer-roll"><span>{site.email}</span><span aria-hidden="true">{site.email}</span></span></a><nav aria-label="Νομικές πληροφορίες">{siteConfig.legalNavigation.map((item) => <Link href={item.href} key={item.href}><span className="footer-roll"><span>{item.label}</span><span aria-hidden="true">{item.label}</span></span></Link>)}<CookiePreferencesButton compact /></nav></div>
+      <div className="site-footer__bottom">
+        <span>© {new Date().getFullYear()} ALANA FC ACADEMY</span>
+        <a className="site-footer__credit" href="https://www.sabaweb.gr" target="_blank" rel="noreferrer"><span className="footer-roll"><span>By Saba Web Solutions</span><span aria-hidden="true">By Saba Web Solutions</span></span></a>
+        <a href={`mailto:${site.email}`}><span className="footer-roll"><span>{site.email}</span><span aria-hidden="true">{site.email}</span></span></a>
+      </div>
     </footer>
         </div>
       </div>
