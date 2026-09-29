@@ -23,6 +23,9 @@ async function main() {
 
   const connection = await mysql.createConnection({ uri: url, multipleStatements: true });
   try {
+    await connection.query("SET SESSION default_storage_engine = 'InnoDB'");
+    const [engines] = await connection.query("SELECT ENGINE FROM information_schema.tables WHERE table_schema = ? AND table_name = 'admin_users'", [databaseName]);
+    if (engines.length && String(engines[0].ENGINE).toLowerCase() !== "innodb") throw new Error("Migration refused: admin_users must use InnoDB before adding the site_settings foreign key.");
     await migrate(drizzle(connection), { migrationsFolder: resolve(__dirname, "database/migrations") });
     process.stdout.write("Production database migrations applied successfully. No application data was imported or replaced.\n");
   } finally {

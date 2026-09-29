@@ -26,6 +26,7 @@ async function main() {
   });
 
   try {
+    await connection.query("SET SESSION default_storage_engine = 'InnoDB'");
     const database = drizzle(connection);
     await migrate(database, {
       migrationsFolder: resolve("database/migrations"),

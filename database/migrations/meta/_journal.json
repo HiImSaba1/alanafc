@@ -61,7 +61,7 @@
     {
       "idx": 8,
       "version": "5",
-      "when": 1789891200000,
+      "when": 1789886000000,
       "tag": "0008_widen_legacy_redirect_paths",
       "breakpoints": true
     },
@@ -77,13 +77,6 @@
       "version": "5",
       "when": 1790672400000,
       "tag": "0010_site_settings",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1790666141429,
-      "tag": "0011_strong_golden_guardian",
       "breakpoints": true
     }
   ]
