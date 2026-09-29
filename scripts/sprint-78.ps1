@@ -1,4 +1,10 @@
 $ErrorActionPreference = 'Stop'
+
+Write-Host "`n== Verify packaged migration runtime ==" -ForegroundColor Cyan
+npm run migration-runtime:verify
+if ($LASTEXITCODE -ne 0) { throw "Migration runtime packaging verification failed with exit code $LASTEXITCODE." }
+npm run migration-runtime:verify:load
+if ($LASTEXITCODE -ne 0) { throw "Migration runtime load verification failed with exit code $LASTEXITCODE." }
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 [Console]::InputEncoding = $utf8
 [Console]::OutputEncoding = $utf8

@@ -20,6 +20,7 @@ test -f .next/standalone/server.js; test -f .next/BUILD_ID; test -d .next/static
 cp -a .next/standalone/. "$release_dir/"
 rm -rf -- "$release_dir/public" "$release_dir/tmp"
 mkdir -p "$release_dir/.next"; cp -a .next/static "$release_dir/.next/static"; cp -a .next/BUILD_ID "$release_dir/.next/BUILD_ID"; cp -a public "$release_dir/public"; cp -a database "$release_dir/database"; cp scripts/deploy/standalone-start.cjs "$release_dir/start.js"; cp scripts/deploy/production-migrate.cjs "$release_dir/migrate.js"; cp scripts/deploy/production-migration-safety.cjs "$release_dir/production-migration-safety.cjs"
+node scripts/deploy/stage-migration-runtime.mjs "$release_dir"
 node scripts/deploy/generate-manifest.mjs "$release_dir" "$release_dir/ARTIFACT-MANIFEST.json" "$git_sha" "$build_timestamp"
 if find "$release_dir" -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' \) -print -quit | grep -q .; then echo "Forbidden private input found in release." >&2; exit 1; fi
 if find "$release_dir" -type f -name '*.sql' ! -path "$release_dir/database/migrations/*" -print -quit | grep -q .; then echo "A database export was found outside the approved migration directory." >&2; exit 1; fi
