@@ -16,7 +16,7 @@ const e2eRunner = read("scripts/run-local-e2e.ts");
 const destination = read("src/components/content/academy-destination-page.tsx");
 const managedPages = ["about-us", "coaching-staff", "our-facilities", "sportclub-alana", "contact-us"].map((route) => read(`src/app/${route}/page.tsx`));
 
-if (!migration.includes("CREATE TABLE `site_settings`") || !schema.includes('mysqlTable("site_settings"')) throw new Error("Site settings migration/schema contract is missing.");
+if (!/CREATE TABLE(?: IF NOT EXISTS)? `site_settings`/.test(migration) || !schema.includes('mysqlTable("site_settings"')) throw new Error("Site settings migration/schema contract is missing.");
 if (!settings.includes("defaultRegistrationSettings") || !settings.includes("registrationGroupOptions")) throw new Error("Registration fallback/group contract is missing.");
 if (!actions.includes("onDuplicateKeyUpdate") || !actions.includes('revalidatePath("/eggrafes-2026-2027")')) throw new Error("Registration settings publication contract is missing.");
 if (!page.includes('dynamic = "force-dynamic"') || !page.includes("getRegistrationSettings") || !page.includes("groups={groups}")) throw new Error("Public registrations page is not dynamically connected to settings.");

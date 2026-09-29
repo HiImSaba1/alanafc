@@ -34,6 +34,9 @@ const siteSettingsMigration = tableCreators.get("site_settings") ?? [];
 if (siteSettingsMigration.length !== 1 || siteSettingsMigration[0] !== "0010_site_settings.sql") throw new Error("site_settings must be created exactly once by 0010_site_settings.sql.");
 const siteSettingsSql = readFileSync(resolve(root, siteSettingsMigration[0]), "utf8");
 if (!/FOREIGN KEY \(`updated_by_user_id`\) REFERENCES `admin_users`\(`id`\) ON DELETE set null/i.test(siteSettingsSql)) throw new Error("site_settings owner foreign key must reference admin_users.id with ON DELETE SET NULL.");
+if (!/ALTER TABLE `admin_users` ENGINE=InnoDB/i.test(siteSettingsSql) || !/CREATE TABLE IF NOT EXISTS `site_settings`[\s\S]+ENGINE=InnoDB/i.test(siteSettingsSql)) throw new Error("0010 must convert only its FK parent and create site_settings explicitly as InnoDB.");
+const engineConversions = [...siteSettingsSql.matchAll(/ALTER\s+TABLE\s+`([^`]+)`\s+ENGINE\s*=\s*InnoDB/gi)].map((match) => match[1]);
+if (engineConversions.join(",") !== "admin_users") throw new Error("0010 may convert only admin_users to InnoDB.");
 if (/\b(?:DROP|TRUNCATE)\s+(?:TABLE\s+)?`?(?:academy_registrations|contact_messages|content_entries|admin_users)`?/i.test(siteSettingsSql)) throw new Error("site_settings migration contains a destructive application-data statement.");
 
 const latestTag = journal.entries.at(-1)?.tag;
@@ -51,7 +54,11 @@ if (!foreignKey || foreignKey.tableTo !== "admin_users" || foreignKey.columnsFro
 const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
 const startup = readFileSync(resolve(process.cwd(), "scripts/deploy/standalone-start.cjs"), "utf8");
 const productionRunner = readFileSync(resolve(process.cwd(), "scripts/deploy/production-migrate.cjs"), "utf8");
+const productionSafety = readFileSync(resolve(process.cwd(), "scripts/deploy/production-migration-safety.cjs"), "utf8");
+const artifactBuilder = readFileSync(resolve(process.cwd(), "scripts/deploy/build-artifact.sh"), "utf8");
+const disposableVerifier = readFileSync(resolve(process.cwd(), "scripts/verify-migrations-disposable.ts"), "utf8");
 if (/migrat/i.test(startup)) throw new Error("Application startup must not run migrations automatically.");
-if (!packageJson.includes('"db:migrate:production"') || !productionRunner.includes("migrationsFolder") || !productionRunner.includes("default_storage_engine = 'InnoDB'") || !productionRunner.includes("admin_users must use InnoDB")) throw new Error("Explicit manual production migration command or its InnoDB FK preflight is missing.");
+if (!packageJson.includes('"db:migrate:production": "node scripts/deploy/production-migrate.cjs"') || !productionRunner.includes("inspectProductionState") || !productionRunner.includes("assertPreservedState") || !productionSafety.includes("ALLOWED_HISTORY_LENGTHS") || !productionSafety.includes("1789891200000") || !productionSafety.includes("row count changed") || !artifactBuilder.includes('production-migration-safety.cjs "$release_dir/production-migration-safety.cjs"')) throw new Error("Explicit production runner, reviewed-state preflight, preservation check, or packaged safety module is missing.");
+if (!disposableVerifier.includes("idx <= 8") || !disposableVerifier.includes("default_storage_engine = 'MyISAM'") || !disposableVerifier.includes("MIGRATION-CHECK-001") || !disposableVerifier.includes("migration-check-content") || !disposableVerifier.includes("runPackagedMigration(upgradeName)") || !disposableVerifier.includes("ON DELETE SET NULL behavior failed") || !disposableVerifier.includes("Rerunning the fully migrated production command was not idempotent")) throw new Error("Disposable verification does not simulate the reviewed production migration state and idempotent upgrade.");
 
 process.stdout.write(`${JSON.stringify({ ok: true, migrations: journal.entries.length, latest: latestTag, siteSettingsMigration: siteSettingsMigration[0], duplicateTableCreates: 0, journalStrictlyIncreasing: true, productionMigrationMode: "explicit_manual", writesPerformed: false }, null, 2)}\n`);

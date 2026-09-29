@@ -108,7 +108,7 @@
     "github:push-release": "powershell -ExecutionPolicy Bypass -File ./scripts/push-github-release.ps1",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate-database.ts",
-    "db:migrate:production": "node --env-file=.env.production.local --import=tsx scripts/migrate-database.ts",
+    "db:migrate:production": "node scripts/deploy/production-migrate.cjs",
     "db:studio": "drizzle-kit studio",
     "db:preflight": "tsx scripts/check-database-preflight.ts",
     "db:preflight:production": "node --env-file=.env.production.local --import=tsx scripts/check-database-preflight.ts",

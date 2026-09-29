@@ -15,6 +15,9 @@ try {
     Write-Host "`n== Verify migration history safety ==" -ForegroundColor Cyan
     & npm run db:migrations:verify
     if ($LASTEXITCODE -ne 0) { throw "Migration history verification failed with exit code $LASTEXITCODE." }
+    Write-Host "`n== Verify disposable production-state migration ==" -ForegroundColor Cyan
+    & npm run db:migrations:verify:disposable
+    if ($LASTEXITCODE -ne 0) { throw "Disposable production-state migration verification failed with exit code $LASTEXITCODE." }
     Write-Host "`n== Verify GitHub Linux release workflow ==" -ForegroundColor Cyan
     & npm run github-release:verify:sprint78
     if ($LASTEXITCODE -ne 0) { throw "GitHub release verification failed with exit code $LASTEXITCODE." }
