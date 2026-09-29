@@ -1,0 +1,1 @@
+ALTER TABLE `content_entries` ADD `article_template` enum('longform','gallery','interview','cinematic','sidebar') DEFAULT 'longform' NOT NULL;

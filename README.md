@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alana FC Academy
 
-## Getting Started
+Custom Next.js website and administration system for Alana FC Academy.
 
-First, run the development server:
+## Sprint 00: read-only WordPress inventory
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+The source XML exports, images, and legacy SQL dump live one directory above this application. The inspection command reads them, calculates checksums, and writes reconciliation reports without importing, changing, or publishing source content. The fresh application database is `next_alanafcacademy`; this command never connects to it.
+
+```powershell
+npm run wp:inspect
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Generated reports:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `artifacts/verification/sprint-00-inventory.json`
+- `artifacts/verification/sprint-00-inventory.md`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Verification commands:
 
-## Learn More
+```powershell
+npm run lint
+npm run typecheck
+npm test
+```
+## Verified GitHub publication
 
-To learn more about Next.js, take a look at the following resources:
+Create an empty private GitHub repository first. Then publish the verified source and create a secret-free TAR from the exact pushed commit:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```powershell
+powershell -ExecutionPolicy Bypass -File '.\scripts\push-github-release.ps1' `
+  -RepositoryUrl 'https://github.com/YOUR-ACCOUNT/YOUR-REPOSITORY.git' `
+  -Message 'Sprint 78: GitHub Papaki standalone release'
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The script runs the complete Sprint 78 verification before staging anything. It blocks environment files, generated builds, reports, local database exports, and archives. The resulting `tmp\alanafc-source-<commit>.tar.gz` is local and ignored by Git. GitHub Actions separately creates the verified Linux standalone TAR documented in `GITHUB_RELEASE.md`.

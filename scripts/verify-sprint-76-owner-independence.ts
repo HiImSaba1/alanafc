@@ -1,0 +1,40 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const root = process.cwd();
+const read = (path: string) => readFileSync(resolve(root, path), "utf8");
+const contract = read("src/features/site-settings/owner-content-contract.ts");
+const query = read("src/features/site-settings/owner-content.ts");
+const action = read("src/features/site-settings/owner-content-actions.ts");
+const admin = read("src/app/admin/site/page.tsx");
+const homepage = read("src/app/page.tsx");
+const layout = read("src/app/layout.tsx");
+const chrome = read("src/components/layout/site-chrome.tsx");
+const header = read("src/components/layout/site-header.tsx");
+const footer = read("src/components/layout/site-footer.tsx");
+const hero = read("src/components/home/home-hero-slider.tsx");
+const testimonials = read("src/components/home/academy-testimonial-stack.tsx");
+const css = read("src/app/globals.css");
+const sprint = read("scripts/sprint-07.ps1");
+const isolatedBuild = read("scripts/run-isolated-production-build.ts");
+const e2eRunner = read("scripts/run-local-e2e.ts");
+const eslintConfig = read("eslint.config.mjs");
+const publicShellTests = read("e2e/public-shell.spec.ts");
+const adminGuide = read("src/app/admin/guide/page.tsx");
+const adminShell = read("src/components/admin/admin-workspace-shell.tsx");
+
+if (!contract.includes("ownerContentSettingsSchema") || !contract.includes("defaultOwnerContentSettings")) throw new Error("Owner settings schema/fallback is missing.");
+if (!query.includes('ownerContentSettingsKey = "owner_public_content"') || !query.includes("safeParse")) throw new Error("Owner settings read/fallback contract is missing.");
+if (!action.includes("onDuplicateKeyUpdate") || !action.includes('revalidatePath("/", "layout")') || !action.includes("τουλάχιστον μία διαφάνεια")) throw new Error("Owner publication safeguards are incomplete.");
+if (!admin.includes("admin-settings-group") || !admin.includes("admin-settings-panel") || !admin.includes('title="Αρχική"') || !admin.includes('href="/admin/site/registrations"') || !admin.includes("owner-media-options") || !admin.includes("Testimonials") || !admin.includes("Χορηγοί") || !admin.includes("serviceCount")) throw new Error("Owner workspace accordion is incomplete.");
+if (!homepage.includes("getOwnerContentSettings") || !homepage.includes("latestPostsCount") || !homepage.includes("heroSlides.filter") || !homepage.includes("services.filter")) throw new Error("Homepage is not driven by owner settings.");
+if (!layout.includes("getOwnerContentSettings") || !chrome.includes("site={site}") || !header.includes("site.navigation.filter") || !footer.includes("site.footerTitle")) throw new Error("Global menu/footer settings are not connected.");
+if (!hero.includes("slides: OwnerHeroSlide[]") || !css.includes("height: 90svh") || !css.includes("max-height: 90svh")) throw new Error("The editable 90svh hero contract is incomplete.");
+if (testimonials.includes("item.id") || !testimonials.includes('key={`${item.name}-${selected}`}')) throw new Error("Owner-managed testimonials still depend on the removed legacy id.");
+if (admin.includes("SMTP_PASSWORD") || admin.includes("DATABASE_URL")) throw new Error("Sensitive infrastructure settings must not appear in the owner workspace.");
+if (!sprint.includes("npm run build:verify") || !isolatedBuild.includes('NEXT_DIST_DIR: "tmp/next-verification"') || !e2eRunner.includes('NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? "tmp/next-verification"')) throw new Error("Verification build and browser tests do not share the isolated artifact.");
+if (!eslintConfig.includes('"tmp/**"')) throw new Error("Generated verification builds are not excluded from linting.");
+if (publicShellTests.includes('name: /K6 · K8/') || !publicShellTests.includes('const firstPanelId = await tabs.first().getAttribute("aria-controls")')) throw new Error("Registration browser coverage is not resilient to owner-managed groups.");
+if (!adminGuide.includes("Οδηγός διαχείρισης") || !adminGuide.includes("Πότε χρειάζεται τεχνική βοήθεια") || !adminGuide.includes("Ποτέ μην κοινοποιείτε κωδικούς") || !adminShell.includes('/admin/guide')) throw new Error("The safe Greek owner guide is incomplete or missing from navigation.");
+
+process.stdout.write(`${JSON.stringify({ ok: true, adminRoute: "/admin/site", settingKey: "owner_public_content", heroHeight: "90svh", sensitiveSettingsExposed: false, writesPerformed: false }, null, 2)}\n`);

@@ -1,0 +1,8 @@
+// Names, roles and quotes are preserved from the legacy WordPress WXR export.
+export const academyTestimonials = [
+  { id: 1, name: "Μαρία Κ.", role: "Μητέρα", quote: "Η Alana FC είναι η καλύτερη ακαδημία ποδοσφαίρου στην περιοχή! Ο γιος μου έχει βελτιώσει τις δεξιότητές του και έχει αποκτήσει νέους φίλους. Οι προπονητές είναι εξαιρετικοί και πραγματικά νοιάζονται για την πρόοδο των παιδιών.", image: "/alana_fc_academy_images_wordpress/alana_kids_1.jpg" },
+  { id: 2, name: "Γιώργος Π.", role: "Πατέρας", quote: "Η εμπειρία μας με την Alana FC ήταν φανταστική. Οι προπονητές είναι επαγγελματίες και το περιβάλλον είναι πολύ φιλικό. Ο γιος μου ανυπομονεί για κάθε προπόνηση!", image: "/alana_fc_academy_images_wordpress/alana_kids_2.jpg" },
+  { id: 3, name: "Ελένη Μ.", role: "Μητέρα", quote: "Η Alana FC προσφέρει μια ολοκληρωμένη εκπαίδευση ποδοσφαίρου. Οι προπονητές είναι αφοσιωμένοι και οι εγκαταστάσεις είναι άριστες. Είμαστε πολύ ευχαριστημένοι με την πρόοδο του παιδιού μας.", image: "/alana_fc_academy_images_wordpress/alana_kids_3.jpg" },
+  { id: 4, name: "Δημήτρης Σ.", role: "Πατέρας", quote: "Η Alana FC είναι περισσότερο από μια ακαδημία ποδοσφαίρου. Είναι μια μεγάλη οικογένεια που υποστηρίζει και ενθαρρύνει τα παιδιά να δώσουν τον καλύτερό τους εαυτό.", image: "/alana_fc_academy_images_wordpress/alana_kids_celebration.jpg" },
+  { id: 5, name: "Άννα Λ.", role: "Μητέρα", quote: "Η Alana FC έχει αλλάξει τη ζωή του γιου μου. Οι προπονητές είναι εξαιρετικοί και το πρόγραμμα προπόνησης είναι πολύ καλά οργανωμένο. Βλέπουμε μεγάλη βελτίωση στις δεξιότητες και στην αυτοπεποίθησή του.", image: "/alana_fc_academy_images_wordpress/team.jpg" },
+] as const;

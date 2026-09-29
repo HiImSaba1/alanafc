@@ -1,0 +1,55 @@
+name: Build Alana FC Papaki standalone release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alanafc-papaki-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-release:
+    name: Verify and package Linux release
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out committed source
+        uses: actions/checkout@v4
+      - name: Set up Node.js 22.23.2
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.2
+          cache: npm
+      - name: Build and verify standalone artifact
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: bash ./scripts/deploy/build-artifact.sh
+      - name: Smoke-test standalone runtime
+        run: bash ./scripts/deploy/verify-runtime.sh ./artifacts/alanafc-papaki-next-build.tar.gz
+      - name: Publish release details
+        shell: bash
+        run: |
+          {
+            echo "## Alana FC Papaki release"
+            echo
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Runtime: Node.js \`$(node --version)\`"
+            echo "- Archive: \`alanafc-papaki-next-build.tar.gz\`"
+            echo "- SHA256: \`$(cut -d ' ' -f 1 artifacts/alanafc-papaki-next-build.tar.gz.sha256)\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload verified Papaki release
+        uses: actions/upload-artifact@v4
+        with:
+          name: alanafc-papaki-linux-release
+          path: |
+            artifacts/alanafc-papaki-next-build.tar.gz
+            artifacts/alanafc-papaki-next-build.tar.gz.sha256
+            artifacts/alanafc-papaki-next-build.tar.gz.manifest.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

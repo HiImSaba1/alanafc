@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/
+/artifacts/
 
 # next.js
 /.next/
@@ -19,6 +24,10 @@
 
 # production
 /build
+/tmp/
+/*.zip
+/*.tar
+/*.tar.gz
 
 # misc
 .DS_Store
@@ -32,6 +41,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local data and private exports (Drizzle migrations under database/ stay tracked)
+/*.sql
+*.sqlite
+*.sqlite3
+
+# local planning/reference files that are not application inputs
+/gemini-suggestions-plan.md
 
 # vercel
 .vercel
