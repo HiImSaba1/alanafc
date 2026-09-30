@@ -48,6 +48,10 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 
+# Runtime media is persistent server data, never release source.
+/public/uploads/media/*
+!/public/uploads/media/.gitkeep
+
 # local planning/reference files that are not application inputs
 /gemini-suggestions-plan.md
 
