@@ -103,6 +103,8 @@
     "owner-site:verify:sprint76": "tsx scripts/verify-sprint-76-owner-independence.ts",
     "owner-controls:verify:sprint77": "tsx scripts/verify-sprint-77-owner-controls.ts",
     "github-release:verify:sprint78": "tsx scripts/verify-sprint-78-github-release.ts",
+    "owner-page-control:verify:sprint79": "tsx scripts/verify-sprint-79-owner-page-control.ts",
+    "useful-documents:verify:sprint80": "tsx scripts/verify-sprint-80-useful-documents.ts",
     "migration-runtime:verify": "tsx scripts/verify-migration-runtime-packaging.ts",
     "migration-runtime:verify:load": "node scripts/verify-migration-runtime-load.mjs",
     "db:migrations:verify": "tsx scripts/verify-migration-history.ts",

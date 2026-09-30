@@ -58,14 +58,14 @@ export function AcademyDestinationPage({ data, managedBodyHtml }: { data: Academ
         </StaggerReveal>
       </section>}
 
-      {data.pillars?.length ? <section className="academy-destination__pillars" aria-label="Οι αρχές της Alana FC Academy">
+      {!managedBodyHtml && data.pillars?.length ? <section className="academy-destination__pillars" aria-label="Οι αρχές της Alana FC Academy">
         <header><AnimatedLines as="h2">Αρχές που γίνονται καθημερινή πράξη.</AnimatedLines><p className="eyebrow">Η βάση μας</p></header>
         <StaggerReveal className="academy-destination__pillars-grid">
           {data.pillars.map((pillar, index) => <article data-reveal-item key={pillar.title}><span>0{index + 1}</span><h3>{pillar.title}</h3><p>{pillar.body}</p></article>)}
         </StaggerReveal>
       </section> : null}
 
-      {data.facilityHighlights?.length ? <section className="academy-facilities" aria-labelledby="academy-facilities-title">
+      {!managedBodyHtml && data.facilityHighlights?.length ? <section className="academy-facilities" aria-labelledby="academy-facilities-title">
         <header><AnimatedLines as="h2" id="academy-facilities-title">Χώροι για κάθε στάδιο εξέλιξης.</AnimatedLines><p className="eyebrow">Τα γήπεδά μας</p></header>
         <StaggerReveal className="academy-facilities__grid">
           {data.facilityHighlights.map((facility, index) => <article data-reveal-item key={facility.metric}>
@@ -76,7 +76,7 @@ export function AcademyDestinationPage({ data, managedBodyHtml }: { data: Academ
         </StaggerReveal>
       </section> : null}
 
-      {data.experienceHighlights?.length ? <section className="academy-experiences" aria-labelledby="academy-experiences-title">
+      {!managedBodyHtml && data.experienceHighlights?.length ? <section className="academy-experiences" aria-labelledby="academy-experiences-title">
         <header><AnimatedLines as="h2" id="academy-experiences-title">Ένας χώρος που φέρνει την κοινότητα κοντά.</AnimatedLines><p className="eyebrow">Sportclub εμπειρίες</p></header>
         <StaggerReveal className="academy-experiences__grid">
           {data.experienceHighlights.map((experience, index) => <article data-reveal-item key={experience.title}>
@@ -85,7 +85,7 @@ export function AcademyDestinationPage({ data, managedBodyHtml }: { data: Academ
         </StaggerReveal>
       </section> : null}
 
-      <section className={`academy-destination__gallery${data.galleryLayout ? ` academy-destination__gallery--${data.galleryLayout}` : ""}`} aria-label={`Εικόνες — ${data.title}`}>
+      {!managedBodyHtml ? <section className={`academy-destination__gallery${data.galleryLayout ? ` academy-destination__gallery--${data.galleryLayout}` : ""}`} aria-label={`Εικόνες — ${data.title}`}>
         {data.galleryTitle ? <header><AnimatedLines as="h2">{data.galleryTitle}</AnimatedLines><p className="eyebrow">{data.galleryLabel}</p></header> : null}
         {data.gallery.map((image, index) => (
           <figure key={image.src}>
@@ -95,16 +95,16 @@ export function AcademyDestinationPage({ data, managedBodyHtml }: { data: Academ
             {image.caption ? <figcaption><span>0{index + 1}</span><strong>{image.caption}</strong></figcaption> : null}
           </figure>
         ))}
-      </section>
+      </section> : null}
 
-      <section className="academy-destination__cta">
+      {!managedBodyHtml ? <section className="academy-destination__cta">
         <div>
           <AnimatedLines as="h2">{data.ctaTitle}</AnimatedLines>
           <p className="eyebrow">Επόμενο βήμα</p>
         </div>
         <p>{data.ctaText}</p>
         <EditorialButton href={data.ctaHref} label={data.ctaLabel} arrow="right" variant="light" />
-      </section>
+      </section> : null}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import { eq, inArray, notInArray } from "drizzle-orm";
@@ -11,7 +11,7 @@ import { z } from "zod";
 import { audit, requireAdmin } from "@/features/admin-auth/session";
 import { seoSlug } from "@/features/seo/content-seo";
 import { db } from "@/lib/db";
-import { contentEntries, mediaAssets } from "@/lib/db/schema";
+import { contentEntries, mediaAssets, siteSettings } from "@/lib/db/schema";
 import { mediaPublicPath, mediaStoragePaths } from "@/lib/media-storage";
 
 const metadataSchema = z.object({
@@ -22,8 +22,10 @@ const metadataSchema = z.object({
 });
 
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_PIXELS = 40_000_000;
 const uploadSchema = z.object({ altText: z.string().trim().min(3).max(500), caption: z.string().trim().max(1000).optional(), credit: z.string().trim().max(255).optional() });
+const documentUploadSchema = z.object({ title: z.string().trim().min(3).max(191), description: z.string().trim().max(1000).optional() });
 
 const publicRoot = resolve(process.cwd(), "public");
 const deletableMediaRoots = [
@@ -54,6 +56,12 @@ async function permanentlyDeleteUnusedMedia(ids: number[], actorUserId: number) 
   const content = await db.select({ featured: contentEntries.featuredMediaExternalId, gallery: contentEntries.galleryMediaExternalIds }).from(contentEntries);
   const used = content.some((entry) => externalIds.has(entry.featured || "") || (Array.isArray(entry.gallery) && entry.gallery.some((externalId) => typeof externalId === "string" && externalIds.has(externalId))));
   if (used) throw new Error("Ένα ή περισσότερα media χρησιμοποιούνται σε περιεχόμενο και δεν μπορούν να διαγραφούν.");
+  const settings = await db.select({ value: siteSettings.valueJson }).from(siteSettings);
+  const usedInSettings = settings.some((entry) => {
+    const serialized = JSON.stringify(entry.value);
+    return typeof serialized === "string" && [...externalIds].some((externalId) => serialized.includes(`\"${externalId}\"`));
+  });
+  if (usedInSettings) throw new Error("Ένα ή περισσότερα media χρησιμοποιούνται στις ρυθμίσεις της ιστοσελίδας και δεν μπορούν να διαγραφούν.");
 
   const otherAssets = await db.select().from(mediaAssets).where(notInArray(mediaAssets.id, ids));
   const pathsUsedByOtherAssets = new Set(otherAssets.flatMap(deletableMediaPaths));
@@ -61,6 +69,16 @@ async function permanentlyDeleteUnusedMedia(ids: number[], actorUserId: number) 
   await db.delete(mediaAssets).where(inArray(mediaAssets.id, ids));
   await Promise.all(paths.map((path) => unlink(path).catch(() => undefined)));
   await Promise.all(assets.map((asset) => audit("media.deleted", actorUserId, "media", asset.externalId)));
+}
+
+async function validatedPdf(file: File) {
+  if (file.size === 0) throw new Error("Επιλέξτε αρχείο PDF.");
+  if (file.size > MAX_DOCUMENT_BYTES) throw new Error("Το PDF δεν μπορεί να ξεπερνά τα 10 MB.");
+  const input = Buffer.from(await file.arrayBuffer());
+  const header = input.subarray(0, 5).toString("ascii");
+  const trailer = input.subarray(Math.max(0, input.length - 2048)).toString("latin1");
+  if (header !== "%PDF-" || !trailer.includes("%%EOF")) throw new Error("Το αρχείο δεν είναι έγκυρο PDF.");
+  return input;
 }
 
 async function validatedImage(file: File) {
@@ -115,6 +133,45 @@ export async function uploadMediaAction(formData: FormData) {
   }
   revalidatePath("/admin/media"); revalidatePath("/"); revalidatePath("/news");
   redirect("/admin/media?uploaded=1");
+}
+
+export async function uploadDocumentAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const parsed = documentUploadSchema.safeParse(Object.fromEntries(formData));
+  const file = formData.get("document");
+  if (!parsed.success || !(file instanceof File)) throw new Error("Επιλέξτε PDF και συμπληρώστε τον τίτλο του.");
+  const input = await validatedPdf(file);
+  const unique = randomUUID();
+  const filename = `alanafc_${seoSlug(parsed.data.title)}_document_${unique.slice(0, 8)}.pdf`;
+  const { uploadDirectory } = mediaStoragePaths();
+  await mkdir(uploadDirectory, { recursive: true });
+  const absolutePath = resolve(uploadDirectory, filename);
+  await writeFile(absolutePath, input, { flag: "wx" });
+  const externalId = `native-document-${unique}`;
+  try {
+    await db.insert(mediaAssets).values({
+      externalId,
+      filename,
+      sourceRelativePath: mediaPublicPath(filename),
+      sha256: createHash("sha256").update(input).digest("hex"),
+      mimeType: "application/pdf",
+      byteSize: input.length,
+      width: null,
+      height: null,
+      altText: parsed.data.title,
+      caption: parsed.data.description || null,
+      credit: "Alana FC Academy",
+      derivativeManifest: [],
+      status: "ready",
+    });
+    await audit("document.uploaded", admin.id, "media", externalId);
+  } catch (error) {
+    await unlink(absolutePath).catch(() => undefined);
+    throw error;
+  }
+  revalidatePath("/admin/media");
+  revalidatePath("/admin/site/documents");
+  redirect(formData.get("returnTo") === "documents" ? `/admin/site/documents?uploaded=1&document=${encodeURIComponent(externalId)}` : "/admin/media?uploaded=document");
 }
 
 export async function replaceMediaFileAction(formData: FormData) {

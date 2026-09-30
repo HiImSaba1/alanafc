@@ -14,7 +14,7 @@ const userActions = read("src/features/admin-auth/user-management-actions.ts");
 const guide = read("src/app/admin/guide/page.tsx");
 const shell = read("src/components/admin/admin-workspace-shell.tsx");
 
-if (!site.includes("DynamicSettingsListEnhancer") || !repeater.includes("Προσθήκη slide") || !repeater.includes("data-repeat-remove") || !repeater.includes("dragstart")) throw new Error("Dynamic add/delete/reorder controls are incomplete.");
+if (!site.includes("DynamicSettingsListEnhancer") || !repeater.includes("Προσθήκη slide") || !repeater.includes("data-repeat-remove") || !repeater.includes("data-repeat-up") || !repeater.includes("data-repeat-down") || repeater.includes("dragstart")) throw new Error("Accessible add/delete/up/down ordering controls are incomplete or legacy drag handling remains.");
 if (!site.includes("MediaPickerEnhancer") || !registration.includes("MediaPickerEnhancer") || !picker.includes("Επιλογή από πολυμέσα") || !picker.includes("showModal")) throw new Error("The visual media picker is not connected to site settings.");
 if (!pages.includes("about-us") || !pages.includes("coaching-staff") || !pages.includes("our-facilities") || !pages.includes("sportclub-alana") || !pages.includes("contact-us") || !site.includes('/admin/site/pages')) throw new Error("Structured internal-page shortcuts are incomplete.");
 if (!registrationSettings.includes("isOpen") || !registrationSettings.includes("closedMessage") || !registrationSettings.includes("guardianEmailMessage") || !registrationSettings.includes("notificationRecipients") || !registration.includes("Λειτουργία φόρμας & email")) throw new Error("Owner-facing registration controls are incomplete.");

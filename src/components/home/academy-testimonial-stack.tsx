@@ -8,7 +8,7 @@ import { ParallaxMedia } from "@/components/motion";
 import type { OwnerTestimonial } from "@/features/site-settings/owner-content-contract";
 import { gsap, SplitText } from "@/lib/animations/gsap";
 
-export function AcademyTestimonialStack({ testimonials }: { testimonials: OwnerTestimonial[] }) {
+export function AcademyTestimonialStack({ testimonials, title, eyebrow }: { testimonials: OwnerTestimonial[]; title: string; eyebrow: string }) {
   const testimonialCount = testimonials.length;
   const [selected, setSelected] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -63,7 +63,7 @@ export function AcademyTestimonialStack({ testimonials }: { testimonials: OwnerT
 
   const item = testimonials[selected];
   return <section ref={root} role="region" aria-labelledby="testimonial-title" className="academy-testimonials" onMouseEnter={stop} onMouseLeave={start} onFocusCapture={stop} onBlurCapture={start}>
-    <header><div><h2 id="testimonial-title">Είπαν για εμάς.</h2><p className="eyebrow">Testimonials</p></div></header>
+    <header><div><h2 id="testimonial-title">{title}</h2><p className="eyebrow">{eyebrow}</p></div></header>
     <article ref={card} key={`${item.name}-${selected}`} data-active-testimonial data-testid="testimonial-card" onPointerDown={(event) => { if (event.button !== 0) return; stop(); drag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY }; }} onPointerMove={(event) => { if (event.pointerId !== drag.current.pointerId) return; const x = event.clientX - drag.current.startX; const y = event.clientY - drag.current.startY; if (Math.abs(x) <= Math.abs(y)) return; event.preventDefault(); gsap.set(event.currentTarget, { x: gsap.utils.clamp(-120, 120, x), rotation: x / 80 }); }} onPointerUp={finish} onPointerCancel={reset}>
       <div data-portrait className="academy-testimonials__portrait"><ParallaxMedia className="academy-testimonials__portrait-media" strength={10}><Image src={item.image} alt="" fill sizes="(min-width: 1024px) 30vw, 90vw" className="object-contain" /></ParallaxMedia></div>
       <div><span data-reveal>0{selected + 1} / 0{testimonialCount}</span><blockquote>“{item.quote}”</blockquote><p data-reveal>{item.name}</p><p data-reveal>{item.role}</p></div>

@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte, ne, notInArray, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { adminUsers, contentEntries, contentEntryTaxonomies, contentRevisions, contentTaxonomies, legacyRedirects, mediaAssets } from "@/lib/db/schema";
+import { adminUsers, contentEntries, contentEntryTaxonomies, contentRevisions, contentTaxonomies, legacyRedirects, mediaAssets, siteSettings } from "@/lib/db/schema";
 
 const visibleNow = () => and(
   eq(contentEntries.migrationStatus, "draft"),
@@ -16,6 +16,18 @@ export function preferredMediaUrl(media: MediaRecord | null): string | null {
   const derivatives = Array.isArray(media.derivativeManifest) ? media.derivativeManifest as Array<{ width?: number; publicPath?: string }> : [];
   const best = [...derivatives].filter((item) => item.publicPath).sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0];
   return best?.publicPath || media.sourceRelativePath || null;
+}
+
+function collectSettingMediaIds(value: unknown, output = new Set<string>()) {
+  if (typeof value === "string" && (value.startsWith("native-media-") || value.startsWith("native-document-"))) output.add(value);
+  else if (Array.isArray(value)) value.forEach((item) => collectSettingMediaIds(item, output));
+  else if (value && typeof value === "object") Object.values(value as Record<string, unknown>).forEach((item) => collectSettingMediaIds(item, output));
+  return output;
+}
+
+async function settingMediaExternalIds() {
+  const rows = await db.select({ value: siteSettings.valueJson }).from(siteSettings);
+  return [...rows.reduce((ids, row) => collectSettingMediaIds(row.value, ids), new Set<string>())];
 }
 
 async function withFeaturedMedia(rows: ContentRecord[]) {
@@ -160,8 +172,19 @@ export async function mediaByExternalIds(externalIds: unknown) {
 }
 
 export async function adminMediaLibrary(limit = 80) {
-  const rows = await db.select().from(mediaAssets).where(eq(mediaAssets.status, "ready")).orderBy(desc(mediaAssets.updatedAt), desc(mediaAssets.id)).limit(Math.min(Math.max(limit, 1), 120));
+  const rows = await db.select().from(mediaAssets).where(and(eq(mediaAssets.status, "ready"), like(mediaAssets.mimeType, "image/%"))).orderBy(desc(mediaAssets.updatedAt), desc(mediaAssets.id)).limit(Math.min(Math.max(limit, 1), 120));
   return rows.map((item) => ({ externalId: item.externalId, src: preferredMediaUrl(item), alt: item.altText || item.filename, filename: item.filename, width: item.width, height: item.height })).filter((item): item is { externalId: string; src: string; alt: string; filename: string; width: number | null; height: number | null } => Boolean(item.src));
+}
+
+export async function adminDocumentLibrary(limit = 120) {
+  const rows = await db.select().from(mediaAssets).where(and(eq(mediaAssets.status, "ready"), eq(mediaAssets.mimeType, "application/pdf"))).orderBy(desc(mediaAssets.updatedAt), desc(mediaAssets.id)).limit(Math.min(Math.max(limit, 1), 200));
+  return rows.map((item) => ({ externalId: item.externalId, src: preferredMediaUrl(item), title: item.altText || item.filename, description: item.caption || "", filename: item.filename, byteSize: item.byteSize })).filter((item): item is { externalId: string; src: string; title: string; description: string; filename: string; byteSize: number | null } => Boolean(item.src));
+}
+
+export async function publicDocumentsByExternalIds(externalIds: string[]) {
+  const uniqueIds = [...new Set(externalIds.filter(Boolean))];
+  if (!uniqueIds.length) return [];
+  return db.select().from(mediaAssets).where(and(inArray(mediaAssets.externalId, uniqueIds), eq(mediaAssets.status, "ready"), eq(mediaAssets.mimeType, "application/pdf")));
 }
 
 export async function adminMediaById(id: number) {
@@ -185,6 +208,8 @@ export async function adminMediaById(id: number) {
           entry.galleryMediaExternalIds.includes(item.externalId)),
     )
     .map(({ id: contentId, title }) => ({ id: contentId, title }));
+  const settingReferences = await settingMediaExternalIds();
+  if (settingReferences.includes(item.externalId)) usedBy.push({ id: 0, title: "Ρυθμίσεις ιστοσελίδας" });
   return { ...item, usedBy };
 }
 
@@ -195,11 +220,14 @@ export async function adminMediaCatalog(filters: { query?: string; status?: "rea
   if (filters.seo === "missing") conditions.push(or(isNull(mediaAssets.altText), eq(mediaAssets.altText, ""))!);
   if (filters.seo === "complete") conditions.push(and(isNotNull(mediaAssets.altText), ne(mediaAssets.altText, ""))!);
   if (filters.usage) {
-    const references = await db.select({ featured: contentEntries.featuredMediaExternalId, gallery: contentEntries.galleryMediaExternalIds }).from(contentEntries);
+    const [references, settingReferences] = await Promise.all([
+      db.select({ featured: contentEntries.featuredMediaExternalId, gallery: contentEntries.galleryMediaExternalIds }).from(contentEntries),
+      settingMediaExternalIds(),
+    ]);
     const usedExternalIds = [...new Set(references.flatMap((entry) => [
       entry.featured,
       ...(Array.isArray(entry.gallery) ? entry.gallery : []),
-    ]).filter((value): value is string => typeof value === "string" && value.length > 0))];
+    ]).filter((value): value is string => typeof value === "string" && value.length > 0).concat(settingReferences))];
     if (filters.usage === "used") conditions.push(usedExternalIds.length ? inArray(mediaAssets.externalId, usedExternalIds) : sql`1 = 0`);
     if (filters.usage === "unused" && usedExternalIds.length) conditions.push(notInArray(mediaAssets.externalId, usedExternalIds));
   }
@@ -211,7 +239,10 @@ export async function adminMediaCatalog(filters: { query?: string; status?: "rea
   const externalIds = new Set(items.map((item) => item.externalId));
   const usage = new Map<string, Array<{ id: number; title: string }>>();
   if (externalIds.size) {
-    const content = await db.select({ id: contentEntries.id, title: contentEntries.title, featuredMediaExternalId: contentEntries.featuredMediaExternalId, galleryMediaExternalIds: contentEntries.galleryMediaExternalIds }).from(contentEntries);
+    const [content, settingReferences] = await Promise.all([
+      db.select({ id: contentEntries.id, title: contentEntries.title, featuredMediaExternalId: contentEntries.featuredMediaExternalId, galleryMediaExternalIds: contentEntries.galleryMediaExternalIds }).from(contentEntries),
+      settingMediaExternalIds(),
+    ]);
     for (const entry of content) {
       const referenced = new Set(
         [
@@ -228,20 +259,22 @@ export async function adminMediaCatalog(filters: { query?: string; status?: "rea
       );
       for (const externalId of referenced) usage.set(externalId, [...(usage.get(externalId) || []), { id: entry.id, title: entry.title }]);
     }
+    for (const externalId of settingReferences) if (externalIds.has(externalId)) usage.set(externalId, [...(usage.get(externalId) || []), { id: 0, title: "Ρυθμίσεις ιστοσελίδας" }]);
   }
   return { items: items.map((item) => ({ ...item, usedBy: usage.get(item.externalId) || [] })), total: Number(totals[0]?.total ?? 0) };
 }
 
 export async function adminMediaHealthSummary() {
-  const [assets, references] = await Promise.all([
+  const [assets, references, settingReferences] = await Promise.all([
     db.select({ externalId: mediaAssets.externalId, status: mediaAssets.status, altText: mediaAssets.altText, sha256: mediaAssets.sha256 }).from(mediaAssets),
     db.select({ featured: contentEntries.featuredMediaExternalId, gallery: contentEntries.galleryMediaExternalIds }).from(contentEntries),
+    settingMediaExternalIds(),
   ]);
   const knownExternalIds = new Set(assets.map((asset) => asset.externalId));
   const usedExternalIds = new Set(references.flatMap((entry) => [
     entry.featured,
     ...(Array.isArray(entry.gallery) ? entry.gallery : []),
-  ]).filter((value): value is string => typeof value === "string" && knownExternalIds.has(value)));
+  ]).filter((value): value is string => typeof value === "string" && knownExternalIds.has(value)).concat(settingReferences.filter((value) => knownExternalIds.has(value))));
   const checksumCounts = new Map<string, number>();
   for (const asset of assets) if (asset.sha256) checksumCounts.set(asset.sha256, (checksumCounts.get(asset.sha256) || 0) + 1);
   return {

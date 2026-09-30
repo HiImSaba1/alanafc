@@ -1148,3 +1148,345 @@ main[tabindex="-1"]:focus { outline: none; }
 .content-view--template-cinematic .content-hero--post { min-height: min(94svh, 68rem); }
 .content-view--template-cinematic .content-story-layout { background: var(--alana-ink); color: var(--alana-paper); }
 .content-view--template-gallery .content-gallery:first-of-type { padding-top: clamp(3rem, 6vw, 5rem); padding-bottom: 0; }
+/* Admin form clarity: strong boundaries and consistent action hierarchy. */
+.admin-workspace main label,
+.admin-workspace main fieldset label {
+  gap: 0.65rem !important;
+}
+
+.admin-workspace main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-workspace main textarea,
+.admin-workspace main select,
+.admin-workspace main input[type="file"] {
+  border: 1px solid #050505 !important;
+  border-radius: 0;
+  background: #fff !important;
+  color: #050505 !important;
+  padding: 0.8rem 0.9rem !important;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.admin-workspace main input[type="file"] {
+  padding: 0.55rem !important;
+}
+
+.admin-workspace main input[type="file"]::file-selector-button {
+  margin-right: 0.8rem;
+  border: 1px solid #050505;
+  background: #050505;
+  color: #f2eee6;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+}
+
+.admin-workspace main input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.admin-workspace main textarea:focus-visible,
+.admin-workspace main select:focus-visible {
+  border-color: #ae8d4b;
+  box-shadow: 0 0 0 3px rgb(174 141 75 / 24%);
+}
+
+.admin-workspace main fieldset,
+.admin-settings-panel,
+.admin-settings-route-card,
+.admin-media-upload,
+.admin-guide__card {
+  border-color: #050505 !important;
+}
+
+.admin-workspace main button:not(:disabled),
+.admin-workspace main a.admin-repeat-add,
+.admin-workspace main .admin-repeat-add,
+.admin-workspace main .admin-site-settings__submit button {
+  border: 1px solid #050505 !important;
+  background: #050505 !important;
+  color: #f2eee6 !important;
+}
+
+.admin-workspace main button:not(:disabled):hover,
+.admin-workspace main button:not(:disabled):focus-visible,
+.admin-workspace main .admin-repeat-add:hover,
+.admin-workspace main .admin-repeat-add:focus-visible {
+  background: #525252 !important;
+  border-color: #525252 !important;
+  color: #fff !important;
+}
+
+.admin-workspace main button:disabled {
+  border: 1px solid #9a9a9a !important;
+  background: #dedbd5 !important;
+  color: #6b6b6b !important;
+  cursor: not-allowed;
+}
+
+.admin-workspace main .admin-repeat-actions {
+  gap: 0.5rem;
+  padding-block: 0.35rem 0.85rem;
+}
+
+.admin-workspace main .admin-repeat-actions button {
+  padding: 0.55rem 0.75rem;
+}
+
+.admin-workspace main label,
+.admin-workspace main .admin-setting-toggle {
+  gap: 0.8rem !important;
+}
+
+.admin-workspace main button,
+.admin-workspace main a:has(> svg) {
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.admin-workspace main button:has(> svg),
+.admin-workspace main a:has(> svg) {
+  display: inline-flex;
+}
+
+.admin-workspace main button > svg,
+.admin-workspace main a > svg {
+  order: 2;
+  flex: 0 0 auto;
+  margin-left: 0.15rem;
+}
+
+.admin-document-wizard {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-documents-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 1rem;
+  padding-block: clamp(1.25rem, 3vw, 2.25rem) !important;
+  margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.admin-documents-header > div {
+  min-width: 0;
+}
+
+.admin-header-button {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 1px solid #050505 !important;
+  background: #050505 !important;
+  color: #f2eee6 !important;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.admin-header-button:hover,
+.admin-header-button:focus-visible {
+  border-color: #525252 !important;
+  background: #525252 !important;
+  color: #fff !important;
+}
+
+.admin-header-button svg {
+  order: 2;
+  width: 1rem;
+  height: 1rem;
+}
+
+.admin-document-wizard__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid #050505;
+  background: #fff;
+}
+
+.admin-workspace main .admin-document-wizard__tabs button {
+  display: flex;
+  min-height: 3.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #050505 !important;
+  background: #f2eee6 !important;
+  color: #050505 !important;
+  text-align: left;
+}
+
+.admin-document-wizard__tabs button span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.admin-document-wizard__tabs button b {
+  color: #ae8d4b;
+  font-size: 0.72rem;
+}
+
+.admin-workspace main .admin-document-wizard__tabs button[aria-selected="true"] {
+  background: #050505 !important;
+  color: #f2eee6 !important;
+}
+
+.admin-workspace main .admin-document-wizard__tabs button:hover,
+.admin-workspace main .admin-document-wizard__tabs button:focus-visible {
+  background: #525252 !important;
+  color: #fff !important;
+}
+
+.admin-document-wizard__step {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid #050505;
+  background: #fff;
+}
+
+.admin-document-wizard__step > header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #050505;
+  margin-bottom: 1rem;
+}
+
+.admin-document-wizard__step > header > span {
+  color: #ae8d4b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-document-wizard__step h2,
+.admin-document-wizard__step p {
+  margin: 0;
+}
+
+.admin-document-wizard__step p {
+  margin-top: 0.35rem;
+}
+
+.admin-document-library {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding-top: 1rem;
+}
+
+.admin-document-library > fieldset {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-document-library > fieldset > .admin-settings-panel {
+  grid-column: 1 / -1 !important;
+  display: block;
+  width: 100%;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+
+.admin-document-library .admin-settings-panel summary,
+.admin-document-library .admin-settings-panel summary > div {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-document-library .admin-settings-panel > summary {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: start;
+  column-gap: 0.8rem;
+}
+
+.admin-document-library .admin-settings-panel > summary > div {
+  grid-column: 2 !important;
+  max-width: none !important;
+  justify-self: stretch;
+}
+
+.admin-document-library .admin-settings-panel > summary > svg {
+  grid-column: 3 !important;
+}
+
+.admin-document-library .admin-settings-panel summary h2 {
+  max-width: 100%;
+  font-size: clamp(0.95rem, 1.25vw, 1.2rem) !important;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.admin-document-library .admin-site-settings__fields,
+.admin-document-library .admin-site-settings__fields > *,
+.admin-document-library .admin-site-settings__fields .is-wide {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-document-library .admin-site-settings__fields strong,
+.admin-document-library .admin-site-settings__fields p,
+.admin-document-library .admin-site-settings__fields small {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.admin-document-library .admin-repeat-actions span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-document-library__view {
+  display: inline-flex !important;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 1px solid #050505;
+  background: #050505;
+  color: #f2eee6;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.admin-document-library__view:hover,
+.admin-document-library__view:focus-visible {
+  border-color: #525252;
+  background: #525252;
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  .admin-documents-header {
+    align-items: stretch !important;
+  }
+
+  .admin-header-button {
+    align-self: flex-start;
+  }
+
+  .admin-document-wizard__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-document-library {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1279px) {
+  .admin-document-library {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

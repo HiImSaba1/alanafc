@@ -49,7 +49,9 @@ try {
     else {
         $origin = (& git remote get-url origin).Trim()
         Assert-LastCommandSucceeded -Step 'Reading origin URL'
-        if ($origin.TrimEnd('/') -ne $RepositoryUrl.TrimEnd('/')) {
+        $normalizedOrigin = ($origin.Trim().TrimEnd('/') -replace '\.git$', '').ToLowerInvariant()
+        $normalizedRepositoryUrl = ($RepositoryUrl.Trim().TrimEnd('/') -replace '\.git$', '').ToLowerInvariant()
+        if ($normalizedOrigin -ne $normalizedRepositoryUrl) {
             throw "Remote 'origin' is '$origin', not '$RepositoryUrl'. No remote was changed."
         }
     }

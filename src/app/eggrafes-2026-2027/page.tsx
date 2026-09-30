@@ -17,7 +17,8 @@ export default async function RegistrationsPage() {
       <ClipReveal className="registration-hero__media"><ParallaxMedia strength={10}><Image src="/alana_fc_academy_images_wordpress/eggrafes_11zon.jpeg" alt="Εγγραφές στην Alana FC Academy" fill priority sizes="100vw" className="object-cover" /></ParallaxMedia></ClipReveal>
       <div className="registration-hero__copy"><StaggerReveal className="registration-hero__meta"><p data-reveal-item>{settings.season}</p><p data-reveal-item>{settings.statusText}</p></StaggerReveal><AnimatedLines as="h1">{settings.titleLines.map((line, index) => <span id={index === 0 ? "registration-title" : undefined} key={`${line}-${index}`}>{line}</span>)}</AnimatedLines><AnimatedLines className="registration-hero__intro">{settings.intro}</AnimatedLines></div>
     </section>
-    <RegistrationProgramGuide settings={settings} />
-    <section id="registration-form" className="registration-form-section" aria-label="Φόρμα εκδήλωσης ενδιαφέροντος">{settings.isOpen ? <RegistrationForm groups={groups} successMessage={settings.successMessage} /> : <div className="registration-success"><p className="eyebrow">Εγγραφές</p><h2>Οι online αιτήσεις είναι κλειστές.</h2><p>{settings.closedMessage}</p></div>}</section>
+    {settings.sectionOrder.filter((section) => section.enabled).map((section) => section.id === "form"
+      ? <section key={section.id} id="registration-form" className="registration-form-section" aria-label="Φόρμα εκδήλωσης ενδιαφέροντος">{settings.isOpen ? <RegistrationForm groups={groups} successMessage={settings.successMessage} /> : <div className="registration-success"><p className="eyebrow">Εγγραφές</p><h2>Οι online αιτήσεις είναι κλειστές.</h2><p>{settings.closedMessage}</p></div>}</section>
+      : <RegistrationProgramGuide key={section.id} settings={settings} />)}
   </main>;
 }

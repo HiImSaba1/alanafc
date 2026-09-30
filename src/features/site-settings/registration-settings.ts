@@ -18,6 +18,8 @@ const programSchema = z.object({
 });
 
 export const registrationSettingsSchema = z.object({
+  sectionOrder: z.array(z.object({ id: z.enum(["form", "programs"]), enabled: z.boolean() })).length(2)
+    .refine((items) => new Set(items.map((item) => item.id)).size === 2, "Κάθε ενότητα εγγραφών πρέπει να εμφανίζεται μία φορά."),
   isOpen: z.boolean(),
   closedMessage: z.string().trim().min(10).max(600),
   successMessage: z.string().trim().min(10).max(600),
@@ -36,6 +38,7 @@ export const registrationSettingsSchema = z.object({
 export type RegistrationSettings = z.infer<typeof registrationSettingsSchema>;
 
 export const defaultRegistrationSettings: RegistrationSettings = {
+  sectionOrder: [{ id: "programs", enabled: true }, { id: "form", enabled: true }],
   isOpen: true,
   closedMessage: "Οι online εκδηλώσεις ενδιαφέροντος έχουν προσωρινά κλείσει. Επικοινωνήστε μαζί μας τηλεφωνικά για περισσότερες πληροφορίες.",
   successMessage: "Η εκδήλωση ενδιαφέροντος καταχωρήθηκε. Θα επικοινωνήσουμε σύντομα μαζί σας.",

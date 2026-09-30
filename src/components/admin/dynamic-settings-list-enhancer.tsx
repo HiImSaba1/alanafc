@@ -3,12 +3,15 @@
 import { useEffect } from "react";
 
 const repeaters = {
+  homepageSectionCount: { prefix: "homepageSection", maximum: 6, label: "", locked: true },
+  registrationSectionCount: { prefix: "registrationSection", maximum: 2, label: "", locked: true },
   heroCount: { prefix: "hero", maximum: 6, label: "Προσθήκη slide" },
   serviceCount: { prefix: "service", maximum: 6, label: "Προσθήκη κάρτας" },
   testimonialCount: { prefix: "testimonial", maximum: 10, label: "Προσθήκη μαρτυρίας" },
   sponsorCount: { prefix: "sponsor", maximum: 8, label: "Προσθήκη χορηγού" },
   navigationCount: { prefix: "navigation", maximum: 10, label: "Προσθήκη συνδέσμου" },
   programCount: { prefix: "program", maximum: 8, label: "Προσθήκη προγράμματος" },
+  documentCount: { prefix: "document", maximum: 40, label: "Προσθήκη εγγράφου" },
 } as const;
 
 function renumber(list: HTMLElement, countInput: HTMLInputElement, prefix: string) {
@@ -20,6 +23,8 @@ function renumber(list: HTMLElement, countInput: HTMLInputElement, prefix: strin
     });
     const legend = item.querySelector("legend");
     if (legend) legend.textContent = `${legend.textContent?.replace(/\s+\d+$/, "") || "Στοιχείο"} ${index + 1}`;
+    const cardIndex = item.querySelector<HTMLElement>(":scope > details > summary > span:first-child");
+    if (cardIndex && /^\d+$/.test(cardIndex.textContent?.trim() || "")) cardIndex.textContent = String(index + 1).padStart(2, "0");
   });
   countInput.value = String(items.length);
 }
@@ -42,22 +47,30 @@ export function DynamicSettingsListEnhancer() {
       if (!countInput || !(list instanceof HTMLElement) || !list.classList.contains("admin-repeat-list")) return;
 
       const enhance = () => {
+        const orderingHelp = list.closest("details")?.querySelector<HTMLElement>("summary p");
+        if (orderingHelp?.textContent?.startsWith("Σύρετε")) orderingHelp.textContent = "Χρησιμοποιήστε τα κουμπιά Πάνω/Κάτω για να αλλάξετε τη σειρά.";
         list.querySelectorAll<HTMLElement>(":scope > fieldset").forEach((item) => {
-          item.draggable = true;
           if (item.querySelector(":scope > .admin-repeat-actions")) return;
           const actions = document.createElement("div");
           actions.className = "admin-repeat-actions";
-          actions.innerHTML = '<span title="Σύρετε για αλλαγή σειράς">↕ Αλλαγή σειράς</span><button type="button" data-repeat-remove>Διαγραφή</button>';
+          actions.innerHTML = `<span>Αλλαγή σειράς</span><button type="button" data-repeat-up aria-label="Μετακίνηση πάνω">↑ Πάνω</button><button type="button" data-repeat-down aria-label="Μετακίνηση κάτω">↓ Κάτω</button>${"locked" in config && config.locked ? "" : '<button type="button" data-repeat-remove>Διαγραφή</button>'}`;
           item.prepend(actions);
         });
         renumber(list, countInput, config.prefix);
+        const items = Array.from(list.querySelectorAll<HTMLElement>(":scope > fieldset"));
+        items.forEach((item, index) => {
+          const up = item.querySelector<HTMLButtonElement>("[data-repeat-up]");
+          const down = item.querySelector<HTMLButtonElement>("[data-repeat-down]");
+          if (up) up.disabled = index === 0;
+          if (down) down.disabled = index === items.length - 1;
+        });
       };
 
       const add = document.createElement("button");
       add.type = "button";
       add.className = "admin-repeat-add";
       add.textContent = `+ ${config.label}`;
-      list.after(add);
+      if (!("locked" in config && config.locked)) list.after(add);
       enhance();
 
       const onAdd = () => {
@@ -72,6 +85,21 @@ export function DynamicSettingsListEnhancer() {
         clone.scrollIntoView({ behavior: "smooth", block: "center" });
       };
       const onClick = (event: Event) => {
+        const moveUp = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-repeat-up]");
+        const moveDown = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-repeat-down]");
+        const item = (event.target as HTMLElement).closest<HTMLElement>("fieldset");
+        if (item?.parentElement === list && moveUp && item.previousElementSibling) {
+          list.insertBefore(item, item.previousElementSibling);
+          enhance();
+          item.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        if (item?.parentElement === list && moveDown && item.nextElementSibling) {
+          list.insertBefore(item.nextElementSibling, item);
+          enhance();
+          item.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-repeat-remove]");
         if (!button) return;
         const items = list.querySelectorAll(":scope > fieldset");
@@ -79,32 +107,9 @@ export function DynamicSettingsListEnhancer() {
         button.closest("fieldset")?.remove();
         enhance();
       };
-      const onDragStart = (event: DragEvent) => {
-        const fieldset = (event.target as HTMLElement).closest<HTMLElement>("fieldset");
-        if (!fieldset || fieldset.parentElement !== list || !event.dataTransfer) return;
-        event.dataTransfer.setData("text/plain", fieldset.dataset.repeatIndex || "0");
-        event.dataTransfer.effectAllowed = "move";
-        fieldset.dataset.dragging = "true";
-      };
-      const onDragEnd = () => list.querySelector<HTMLElement>("[data-dragging]")?.removeAttribute("data-dragging");
-      const onDragOver = (event: DragEvent) => { event.preventDefault(); };
-      const onDrop = (event: DragEvent) => {
-        event.preventDefault();
-        const source = list.querySelector<HTMLElement>("[data-dragging]");
-        const target = (event.target as HTMLElement).closest<HTMLElement>("fieldset");
-        if (!source || !target || target.parentElement !== list || source === target) return;
-        const box = target.getBoundingClientRect();
-        list.insertBefore(source, event.clientY > box.top + box.height / 2 ? target.nextSibling : target);
-        source.removeAttribute("data-dragging");
-        renumber(list, countInput, config.prefix);
-      };
       add.addEventListener("click", onAdd);
       list.addEventListener("click", onClick);
-      list.addEventListener("dragstart", onDragStart);
-      list.addEventListener("dragend", onDragEnd);
-      list.addEventListener("dragover", onDragOver);
-      list.addEventListener("drop", onDrop);
-      cleanups.push(() => { add.remove(); list.removeEventListener("click", onClick); list.removeEventListener("dragstart", onDragStart); list.removeEventListener("dragend", onDragEnd); list.removeEventListener("dragover", onDragOver); list.removeEventListener("drop", onDrop); });
+      cleanups.push(() => { add.remove(); list.removeEventListener("click", onClick); });
     });
     return () => cleanups.forEach((cleanup) => cleanup());
   }, []);

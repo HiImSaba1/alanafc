@@ -10,7 +10,13 @@ export const ownerContentSettingsKey = "owner_public_content";
 export async function getOwnerContentSettings(): Promise<OwnerContentSettings> {
   try {
     const row = (await db.select({ value: siteSettings.valueJson }).from(siteSettings).where(eq(siteSettings.settingKey, ownerContentSettingsKey)).limit(1))[0];
-    const parsed = ownerContentSettingsSchema.safeParse(row?.value);
+    const stored = row?.value && typeof row.value === "object" && !Array.isArray(row.value) ? row.value as Partial<OwnerContentSettings> : {};
+    const parsed = ownerContentSettingsSchema.safeParse({
+      ...defaultOwnerContentSettings,
+      ...stored,
+      site: { ...defaultOwnerContentSettings.site, ...stored.site },
+      homepage: { ...defaultOwnerContentSettings.homepage, ...stored.homepage },
+    });
     return parsed.success ? parsed.data : defaultOwnerContentSettings;
   } catch {
     return defaultOwnerContentSettings;

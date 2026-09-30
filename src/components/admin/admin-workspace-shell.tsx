@@ -13,6 +13,7 @@ const links = [
   { href: "/admin/media", label: "Βιβλιοθήκη media" },
   { href: "/admin/site", label: "Ιστοσελίδα & αρχική" },
   { href: "/admin/site/registrations", label: "Σελίδα εγγραφών" },
+  { href: "/admin/site/documents", label: "Χρήσιμα έγγραφα" },
   { href: "/admin/guide", label: "Οδηγός διαχείρισης" },
   { href: "/admin/users", label: "Χρήστες admin", ownerOnly: true },
   { href: "/admin/registrations", label: "Εγγραφές" },

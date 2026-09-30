@@ -21,6 +21,7 @@ export const siteConfig = {
     { href: "/news", changeFrequency: "weekly", priority: 0.9 },
     { href: "/eggrafes-2026-2027", changeFrequency: "weekly", priority: 0.9 },
     { href: "/contact-us", changeFrequency: "monthly", priority: 0.8 },
+    { href: "/useful-documents", changeFrequency: "monthly", priority: 0.6 },
     { href: "/privacy", changeFrequency: "yearly", priority: 0.3 },
     { href: "/cookies", changeFrequency: "yearly", priority: 0.3 },
     { href: "/accessibility", changeFrequency: "yearly", priority: 0.3 },

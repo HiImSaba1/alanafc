@@ -18,6 +18,7 @@ export async function updateOwnerContentSettings(formData: FormData) {
   const testimonialCount = Math.min(Math.max(Number(formData.get("testimonialCount")) || 0, 1), 10);
   const sponsorCount = Math.min(Math.max(Number(formData.get("sponsorCount")) || 0, 1), 8);
   const serviceCount = Math.min(Math.max(Number(formData.get("serviceCount")) || 0, 1), 6);
+  const homepageSectionCount = 6;
   const input = {
     site: {
       email: value(formData, "site.email"), phone: value(formData, "site.phone"), phoneDisplay: value(formData, "site.phoneDisplay"),
@@ -29,20 +30,27 @@ export async function updateOwnerContentSettings(formData: FormData) {
       footerButtonLabel: value(formData, "site.footerButtonLabel"), footerButtonHref: value(formData, "site.footerButtonHref"), footerWordmark: value(formData, "site.footerWordmark"),
     },
     homepage: {
+      sectionOrder: Array.from({ length: homepageSectionCount }, (_, index) => ({
+        id: value(formData, `homepageSection.${index}.id`), enabled: checked(formData, `homepageSection.${index}.enabled`),
+      })),
       heroSlides: Array.from({ length: heroCount }, (_, index) => ({
         enabled: checked(formData, `hero.${index}.enabled`), href: value(formData, `hero.${index}.href`), button: value(formData, `hero.${index}.button`), eyebrow: value(formData, `hero.${index}.eyebrow`), title: value(formData, `hero.${index}.title`), description: value(formData, `hero.${index}.description`), image: value(formData, `hero.${index}.image`), alt: value(formData, `hero.${index}.alt`),
       })),
       introEyebrow: value(formData, "homepage.introEyebrow"), introTitle: value(formData, "homepage.introTitle"), introText: value(formData, "homepage.introText"),
       introButtonLabel: value(formData, "homepage.introButtonLabel"), introButtonHref: value(formData, "homepage.introButtonHref"), latestPostsCount: Number(formData.get("homepage.latestPostsCount")),
+      newsEyebrow: value(formData, "homepage.newsEyebrow"), newsTitle: value(formData, "homepage.newsTitle"), newsButtonLabel: value(formData, "homepage.newsButtonLabel"), newsEmptyText: value(formData, "homepage.newsEmptyText"),
+      servicesEyebrow: value(formData, "homepage.servicesEyebrow"), servicesTitle: value(formData, "homepage.servicesTitle"),
       services: Array.from({ length: serviceCount }, (_, index) => ({
         enabled: checked(formData, `service.${index}.enabled`), title: value(formData, `service.${index}.title`), href: value(formData, `service.${index}.href`), buttonLabel: value(formData, `service.${index}.buttonLabel`), description: value(formData, `service.${index}.description`), keywords: value(formData, `service.${index}.keywords`).split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean), image: value(formData, `service.${index}.image`),
       })),
       testimonials: Array.from({ length: testimonialCount }, (_, index) => ({
         enabled: checked(formData, `testimonial.${index}.enabled`), name: value(formData, `testimonial.${index}.name`), role: value(formData, `testimonial.${index}.role`), quote: value(formData, `testimonial.${index}.quote`), image: value(formData, `testimonial.${index}.image`),
       })),
+      testimonialsEyebrow: value(formData, "homepage.testimonialsEyebrow"), testimonialsTitle: value(formData, "homepage.testimonialsTitle"),
       sponsors: Array.from({ length: sponsorCount }, (_, index) => ({
         enabled: checked(formData, `sponsor.${index}.enabled`), name: value(formData, `sponsor.${index}.name`), href: value(formData, `sponsor.${index}.href`), image: value(formData, `sponsor.${index}.image`),
       })),
+      sponsorsEyebrow: value(formData, "homepage.sponsorsEyebrow"), sponsorsTitle: value(formData, "homepage.sponsorsTitle"),
       contactTitle: value(formData, "homepage.contactTitle"), contactEyebrow: value(formData, "homepage.contactEyebrow"), contactText: value(formData, "homepage.contactText"), contactButtonLabel: value(formData, "homepage.contactButtonLabel"),
     },
   };

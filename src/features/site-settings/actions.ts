@@ -23,6 +23,10 @@ export async function updateRegistrationSettings(formData: FormData) {
     image: String(formData.get(`program.${index}.image`) ?? "/programma_proponisewn_alana.jpg"),
   }));
   const parsed = registrationSettingsSchema.safeParse({
+    sectionOrder: Array.from({ length: 2 }, (_, index) => ({
+      id: String(formData.get(`registrationSection.${index}.id`) ?? ""),
+      enabled: formData.get(`registrationSection.${index}.enabled`) === "on",
+    })),
     isOpen: formData.get("isOpen") === "on",
     closedMessage: formData.get("closedMessage"),
     successMessage: formData.get("successMessage"),
