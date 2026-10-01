@@ -8,9 +8,10 @@ import { z } from "zod";
 import { audit, requireAdmin } from "@/features/admin-auth/session";
 import { buildContentSeo } from "@/features/seo/content-seo";
 import { normalizeContentSlug, normalizeGreekTitleConjunctions, publicationFromIntent, sanitizeEditorHtml } from "./core";
+import { contentPresentationSettingKey } from "./queries";
 import { db } from "@/lib/db";
 import { articleTemplateKeys } from "@/lib/content-template-keys";
-import { contentEntries, contentEntryTaxonomies, contentRevisions, contentTaxonomies } from "@/lib/db/schema";
+import { contentEntries, contentEntryTaxonomies, contentRevisions, contentTaxonomies, siteSettings } from "@/lib/db/schema";
 
 export type ContentEditorState = { error?: string };
 
@@ -71,6 +72,9 @@ const editorSchema = z.object({
   categories: z.string().max(1000).optional(),
   featuredMediaExternalId: z.string().trim().max(64).optional(),
   galleryMediaExternalIds: z.string().max(4000).optional(),
+  showAuthor: z.literal("on").optional(),
+  showTemplate: z.literal("on").optional(),
+  showCategories: z.literal("on").optional(),
   scheduledFor: z.string().optional(),
   intent: z.enum(["save", "publish", "schedule", "unpublish", "archive"]),
 });
@@ -145,6 +149,14 @@ export async function saveContentAction(_state: ContentEditorState, formData: Fo
         const category = await transaction.select({ id: contentTaxonomies.id }).from(contentTaxonomies).where(and(eq(contentTaxonomies.taxonomy, "category"), eq(contentTaxonomies.slug, categorySlug))).limit(1);
         if (category[0]) await transaction.insert(contentEntryTaxonomies).values({ contentEntryId: id, taxonomyId: category[0].id }).onDuplicateKeyUpdate({ set: { taxonomyId: category[0].id } });
       }
+      await transaction.insert(siteSettings).values({
+        settingKey: contentPresentationSettingKey(id),
+        valueJson: { showAuthor: input.showAuthor === "on", showTemplate: input.showTemplate === "on", showCategories: input.showCategories === "on" },
+        updatedByUserId: admin.id,
+      }).onDuplicateKeyUpdate({ set: {
+        valueJson: { showAuthor: input.showAuthor === "on", showTemplate: input.showTemplate === "on", showCategories: input.showCategories === "on" },
+        updatedByUserId: admin.id,
+      } });
       return id;
     });
     await audit(`content.${publication.status}`, admin.id, input.kind, String(contentId));

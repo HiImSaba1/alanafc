@@ -10,7 +10,7 @@ import { articleTemplateCatalog, type ArticleTemplateKey } from "@/features/cont
 import { articleTemplateKeys } from "@/lib/content-template-keys";
 import { EditorialHtmlComposer } from "./editorial-html-composer";
 
-type InitialContent = { id?: number; kind: "page" | "post"; articleTemplate: ArticleTemplateKey; title: string; slug: string; excerpt: string; bodyHtml: string; seoTitle: string; seoDescription: string; categories: string; featuredMediaExternalId: string; galleryMediaExternalIds: string; publicationStatus: "draft" | "published" | "scheduled" | "archived"; scheduledFor: string };
+type InitialContent = { id?: number; kind: "page" | "post"; articleTemplate: ArticleTemplateKey; title: string; slug: string; excerpt: string; bodyHtml: string; seoTitle: string; seoDescription: string; categories: string; featuredMediaExternalId: string; galleryMediaExternalIds: string; publicationStatus: "draft" | "published" | "scheduled" | "archived"; scheduledFor: string; showAuthor: boolean; showTemplate: boolean; showCategories: boolean };
 type MediaChoice = { externalId: string; src: string; alt: string; filename: string; width: number | null; height: number | null };
 const initialState: ContentEditorState = {};
 const steps = ["Template", "Βασικά", "Περιεχόμενο", "SEO & media", "Δημοσίευση"] as const;
@@ -18,6 +18,7 @@ const steps = ["Template", "Βασικά", "Περιεχόμενο", "SEO & medi
 export function ContentEditor({ initial, mediaLibrary = [], clearDraftKey }: { initial: InitialContent; mediaLibrary?: MediaChoice[]; clearDraftKey?: string }) {
   const [state, action, pending] = useActionState(saveContentAction, initialState);
   const [step, setStep] = useState(1);
+  const [kind, setKind] = useState<"page" | "post">(initial.kind);
   const [articleTemplate, setArticleTemplate] = useState<ArticleTemplateKey>(initial.articleTemplate);
   const [title, setTitle] = useState(initial.title);
   const [slug, setSlug] = useState(initial.slug);
@@ -52,7 +53,7 @@ export function ContentEditor({ initial, mediaLibrary = [], clearDraftKey }: { i
       </section>
       <section className="article-editor__panel" hidden={step !== 2}>
         <p className="article-editor__eyebrow">Τίτλος / ιστορία</p><h2>Τα βασικά του περιεχομένου.</h2>
-        <div className="article-editor__two-cols"><label>Τύπος<select name="kind" defaultValue={initial.kind}><option value="post">Άρθρο</option><option value="page">Σελίδα</option></select></label><label>Slug<input name="slug" value={slug} onChange={(event) => { setSlug(event.target.value); setSlugTouched(true); }} required maxLength={191} placeholder="titlos-arthrou" /><small>ASCII πρόταση από τον τίτλο. Μπορείτε να την αλλάξετε.</small></label></div>
+        <div className="article-editor__two-cols"><label>Τύπος<select name="kind" value={kind} onChange={(event) => setKind(event.target.value as "page" | "post")}><option value="post">Άρθρο</option><option value="page">Σελίδα</option></select></label><label>Slug<input name="slug" value={slug} onChange={(event) => { setSlug(event.target.value); setSlugTouched(true); }} required maxLength={191} placeholder="titlos-arthrou" /><small>ASCII πρόταση από τον τίτλο. Μπορείτε να την αλλάξετε.</small></label></div>
         <label>Τίτλος<input className="article-editor__title-input" name="title" value={title} onChange={(event) => { const nextTitle = event.target.value; setTitle(nextTitle); if (!slugTouched) setSlug(nextTitle.trim() ? suggestGreeklishSlug(nextTitle) : ""); }} required maxLength={300} lang="el" spellCheck placeholder="Ποια ιστορία θέλετε να πείτε;" /></label>
         <label>Σύντομη περιγραφή<textarea name="excerpt" value={excerpt} onChange={(event) => setExcerpt(event.target.value)} rows={4} maxLength={1000} lang="el" spellCheck placeholder="Μια σύντομη εισαγωγή για τις κάρτες και την αρχική σελίδα." /></label>
       </section>
@@ -78,6 +79,7 @@ export function ContentEditor({ initial, mediaLibrary = [], clearDraftKey }: { i
       <section className="article-editor__panel article-editor__review" hidden={step !== 5}>
         <p className="article-editor__eyebrow">Τελικός έλεγχος</p><h2>{title || "Χωρίς τίτλο"}</h2>
         <dl><div><dt>Template</dt><dd>{articleTemplateCatalog[articleTemplate].label}</dd></div><div><dt>Διεύθυνση</dt><dd>/news/{slug || "—"}</dd></div><div><dt>Απόσπασμα</dt><dd>{excerpt || "Δεν έχει συμπληρωθεί"}</dd></div><div><dt>SEO</dt><dd>{seoTitle && seoDescription ? "Συμπληρωμένο" : "Χρειάζεται έλεγχο"}</dd></div><div><dt>Κατάσταση</dt><dd>{initial.publicationStatus}</dd></div></dl>
+        {kind === "post" ? <fieldset className="article-editor__metadata-options"><legend>Στοιχεία που εμφανίζονται δημόσια</legend><p>Παραμένουν κρυφά εκτός αν ενεργοποιήσετε την αντίστοιχη επιλογή.</p><label><input type="checkbox" name="showAuthor" defaultChecked={initial.showAuthor} /> Συντάκτης</label><label><input type="checkbox" name="showTemplate" defaultChecked={initial.showTemplate} /> Template άρθρου</label><label><input type="checkbox" name="showCategories" defaultChecked={initial.showCategories} /> Κατηγορίες</label></fieldset> : null}
         <label>Προγραμματισμός<input type="datetime-local" name="scheduledFor" defaultValue={initial.scheduledFor} /></label>
         <div className="article-editor__actions">
           <button name="intent" value="save" disabled={pending}>Αποθήκευση πρόχειρου</button><button name="intent" value="publish" disabled={pending}>Δημοσίευση</button><button name="intent" value="schedule" disabled={pending}>Προγραμματισμός</button>

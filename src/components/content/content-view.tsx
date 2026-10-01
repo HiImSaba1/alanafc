@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { AnimatedLines, ParallaxMedia } from "@/components/motion";
 import { articleTemplateCatalog } from "@/features/content/template-catalog";
-import type { ContentRecord, MediaRecord } from "@/features/content/queries";
-import { preferredMediaUrl } from "@/features/content/queries";
+import type { ContentPresentation, ContentRecord, MediaRecord } from "@/features/content/queries";
+import { defaultContentPresentation, preferredMediaUrl } from "@/features/content/queries";
 import { RichContent } from "./rich-content";
 
 function ContentGallery({ gallery, title }: { gallery: MediaRecord[]; title: string }) {
@@ -14,7 +14,7 @@ function ContentGallery({ gallery, title }: { gallery: MediaRecord[]; title: str
 
 type PostContext = { newer: { slug: string; title: string } | null; older: { slug: string; title: string } | null; categories: string[]; related: Array<{ content: ContentRecord; media: MediaRecord | null; gallery: MediaRecord[] }> };
 
-export function ContentView({ content, media, gallery = [], preview = false, postContext }: { content: ContentRecord; media: MediaRecord | null; gallery?: MediaRecord[]; preview?: boolean; postContext?: PostContext }) {
+export function ContentView({ content, media, gallery = [], preview = false, postContext, presentation = defaultContentPresentation }: { content: ContentRecord; media: MediaRecord | null; gallery?: MediaRecord[]; preview?: boolean; postContext?: PostContext; presentation?: ContentPresentation }) {
   const imageUrl = preferredMediaUrl(media);
   const publicationLabel = content.kind === "post" && content.publishedAt ? new Intl.DateTimeFormat("el-GR", { dateStyle: "long" }).format(content.publishedAt) : null;
   const template = content.kind === "post" ? content.articleTemplate : "longform";
@@ -28,7 +28,7 @@ export function ContentView({ content, media, gallery = [], preview = false, pos
       {content.kind === "post" && imageUrl ? <span className="content-hero__overlay" aria-hidden="true" /> : null}
     </header>
     {galleryFirst ? <ContentGallery gallery={gallery} title={content.title} /> : null}
-    {content.kind === "post" ? <div className="content-story-meta"><div><span>Συντάκτης</span><strong>{content.authorName || "Alana FC Academy"}</strong></div><div><span>Template</span><strong>{templateLabel}</strong></div>{postContext?.categories.length ? <div><span>Κατηγορίες</span><strong>{postContext.categories.join(" · ")}</strong></div> : null}</div> : null}
+    {content.kind === "post" && (presentation.showAuthor || presentation.showTemplate || (presentation.showCategories && postContext?.categories.length)) ? <div className="content-story-meta">{presentation.showAuthor ? <div><span>Συντάκτης</span><strong>{content.authorName || "Alana FC Academy"}</strong></div> : null}{presentation.showTemplate ? <div><span>Template</span><strong>{templateLabel}</strong></div> : null}{presentation.showCategories && postContext?.categories.length ? <div><span>Κατηγορίες</span><strong>{postContext.categories.join(" · ")}</strong></div> : null}</div> : null}
     <div className={`content-story-layout article-template article-template--${template}`} data-article-template={template}>
       {content.kind === "post" && template === "sidebar" ? <aside className="content-story-sidebar"><span>Μορφή άρθρου</span><strong>{templateLabel}</strong>{publicationLabel ? <time>{publicationLabel}</time> : null}<Link href="/news">Όλα τα νέα ↗</Link></aside> : null}
       <article className="content-body"><RichContent html={content.bodyHtml} /></article>

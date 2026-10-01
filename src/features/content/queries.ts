@@ -10,6 +10,20 @@ const visibleNow = () => and(
 
 export type ContentRecord = typeof contentEntries.$inferSelect;
 export type MediaRecord = typeof mediaAssets.$inferSelect;
+export type ContentPresentation = { showAuthor: boolean; showTemplate: boolean; showCategories: boolean };
+export const defaultContentPresentation: ContentPresentation = { showAuthor: false, showTemplate: false, showCategories: false };
+
+export function contentPresentationSettingKey(contentId: number) { return `content_presentation_${contentId}`; }
+
+export async function contentPresentation(contentId: number): Promise<ContentPresentation> {
+  const row = (await db.select({ value: siteSettings.valueJson }).from(siteSettings).where(eq(siteSettings.settingKey, contentPresentationSettingKey(contentId))).limit(1))[0];
+  const value = row?.value && typeof row.value === "object" && !Array.isArray(row.value) ? row.value as Partial<ContentPresentation> : {};
+  return {
+    showAuthor: value.showAuthor === true,
+    showTemplate: value.showTemplate === true,
+    showCategories: value.showCategories === true,
+  };
+}
 
 export function preferredMediaUrl(media: MediaRecord | null): string | null {
   if (!media) return null;
@@ -49,7 +63,8 @@ export async function publicPageBySlug(slug: string) {
 
 export async function publicPostBySlug(slug: string) {
   const rows = await db.select().from(contentEntries).where(and(eq(contentEntries.kind, "post"), eq(contentEntries.slug, slug), visibleNow())).limit(1);
-  return (await withFeaturedMedia(rows))[0] ?? null;
+  const result = (await withFeaturedMedia(rows))[0];
+  return result ? { ...result, presentation: await contentPresentation(result.content.id) } : null;
 }
 
 export async function publicPostRedirect(slug: string) {
