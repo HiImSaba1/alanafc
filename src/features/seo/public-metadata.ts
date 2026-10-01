@@ -9,8 +9,9 @@ type PublicMetadataInput = {
   imageAlt?: string;
 };
 
-export function publicPageMetadata({ title, description, path, image = siteConfig.socialImage, imageAlt = siteConfig.name }: PublicMetadataInput): Metadata {
+export function publicPageMetadata({ title, description, path }: PublicMetadataInput): Metadata {
   const socialTitle = `${title} | ${siteConfig.name}`;
+  const image = siteConfig.socialImage;
   return {
     title,
     description,
@@ -22,7 +23,7 @@ export function publicPageMetadata({ title, description, path, image = siteConfi
       title: socialTitle,
       description,
       url: path,
-      images: [{ url: image, alt: imageAlt }],
+      images: [{ url: image, alt: siteConfig.name }],
     },
     twitter: {
       card: "summary_large_image",

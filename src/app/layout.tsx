@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     icon: [{ url: "/icon.png", type: "image/png", sizes: "1254x1254" }],
     apple: [{ url: "/icon.png", type: "image/png", sizes: "1254x1254" }],
   },
-  openGraph: { type: "website", locale: "el_GR", siteName: siteConfig.name, title: siteConfig.name, description: siteConfig.description, url: "/", images: [{ url: siteConfig.socialImage, width: 2048, height: 1495, alt: "Παιδιά της Alana FC Academy στο γήπεδο" }] },
+  openGraph: { type: "website", locale: "el_GR", siteName: siteConfig.name, title: siteConfig.name, description: siteConfig.description, url: "/", images: [{ url: siteConfig.socialImage, width: 1800, height: 942, alt: "Alana FC Academy" }] },
   twitter: { card: "summary_large_image", title: siteConfig.name, description: siteConfig.description, images: [siteConfig.socialImage] },
 };
 

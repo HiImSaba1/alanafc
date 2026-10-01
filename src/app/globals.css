@@ -1005,6 +1005,19 @@ main[tabindex="-1"]:focus { outline: none; }
 .editorial-html-composer > footer span { color: var(--alana-charcoal); font: 700 .52rem/1 var(--font-alana-mono); text-transform: uppercase; }
 .editorial-html-composer__recovery { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--alana-gold); background: #fff5da; padding: 1rem; }
 .editorial-html-composer__recovery > div:first-child { display: grid; gap: .3rem; }.editorial-html-composer__recovery span { color: var(--alana-charcoal); font-size: .68rem; }.editorial-html-composer__recovery > div:last-child { display: flex; gap: .4rem; }.editorial-html-composer__recovery button { border: 1px solid var(--alana-ink); background: var(--alana-ink); color: white; padding: .65rem .8rem; cursor: pointer; font: 700 .56rem/1 var(--font-alana-mono); text-transform: uppercase; }.editorial-html-composer__recovery button:last-child { background: transparent; color: var(--alana-ink); }
+.editorial-html-composer__media { display: grid; gap: 1rem; border-bottom: 1px solid var(--alana-line); background: #f6f2ea; padding: 1rem; }
+.editorial-html-composer__media > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.editorial-html-composer__media > header > div { display: grid; gap: .3rem; }
+.editorial-html-composer__media > header strong { font: 750 .78rem/1.1 var(--font-alana-display); }
+.editorial-html-composer__media > header span { color: var(--alana-charcoal); font-size: .68rem; }
+.editorial-html-composer__media > header button { border: 1px solid var(--alana-ink); background: var(--alana-ink); color: white; padding: .6rem .8rem; cursor: pointer; font: 700 .55rem/1 var(--font-alana-mono); text-transform: uppercase; }
+.editorial-html-composer__media > div { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; max-height: 25rem; overflow-y: auto; }
+.editorial-html-composer__media > div > button { min-width: 0; display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); align-items: center; gap: .7rem; border: 1px solid #b7afa2; background: white; color: var(--alana-ink); padding: .45rem; text-align: left; cursor: pointer; }
+.editorial-html-composer__media > div > button:hover, .editorial-html-composer__media > div > button:focus-visible { border-color: var(--alana-ink); background: var(--alana-ink); color: white; }
+.editorial-html-composer__media img { width: 4.5rem; height: 4.5rem; object-fit: cover; background: #ddd5c8; }
+.editorial-html-composer__media > div > button span { min-width: 0; display: grid; gap: .35rem; color: inherit; }
+.editorial-html-composer__media > div > button strong { overflow: hidden; text-overflow: ellipsis; font-size: .68rem; white-space: nowrap; }
+.editorial-html-composer__media > div > button small { color: inherit; font: 700 .5rem/1 var(--font-alana-mono); text-transform: uppercase; }
 .article-editor label > small { color: var(--alana-charcoal); font-weight: 500; }
 
 @media (max-width: 560px) {
@@ -1013,6 +1026,12 @@ main[tabindex="-1"]:focus { outline: none; }
   .editorial-html-composer > header button { flex: 1 1 auto; }
   .editorial-html-composer > footer { flex-direction: column; }
   .editorial-html-composer__recovery { align-items: stretch; flex-direction: column; }.editorial-html-composer__recovery > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
+  .editorial-html-composer__media > header { align-items: stretch; flex-direction: column; }
+  .editorial-html-composer__media > div { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 561px) and (max-width: 1100px) {
+  .editorial-html-composer__media > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Sprint 29: Acadimies editorial workspace, adapted to the Alana identity. */

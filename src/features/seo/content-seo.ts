@@ -41,3 +41,16 @@ export function buildContentSeo(input: {
 export function buildSeoImageFilename(input: { seoName: string; imageNumber: string | number; width: number }): string {
   return `alanafc_${seoSlug(input.seoName)}_img_${input.imageNumber}_${input.width}w.webp`;
 }
+
+export function firstContentImageSrc(bodyHtml?: string | null): string | null {
+  const match = bodyHtml?.match(/<img\b[^>]*\bsrc\s*=\s*(["'])(.*?)\1/i);
+  const source = match?.[2]?.trim().replace(/&amp;/g, "&");
+  if (!source) return null;
+  if (source.startsWith("/") && !source.startsWith("//")) return source;
+  try {
+    const url = new URL(source);
+    return url.protocol === "http:" || url.protocol === "https:" ? source : null;
+  } catch {
+    return null;
+  }
+}

@@ -19,4 +19,8 @@ describe("Greek public site contract", () => {
   it("uses the approved academy mailbox", () => {
     expect(siteConfig.email).toBe("f.c.alana@hotmail.com");
   });
+
+  it("uses the approved branded image for generic shared links", () => {
+    expect(siteConfig.socialImage).toBe("/alanafc-shared-links.jpg");
+  });
 });

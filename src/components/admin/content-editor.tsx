@@ -58,7 +58,7 @@ export function ContentEditor({ initial, mediaLibrary = [], clearDraftKey }: { i
       </section>
       <section className="article-editor__panel" hidden={step !== 3}>
         <p className="article-editor__eyebrow">Κύριο κείμενο</p><div className="article-editor__content-heading"><div><h2>Περιεχόμενο άρθρου</h2><p>HTML περιεχόμενο από τον ασφαλή editor της Alana FC.</p></div><span>ARTICLE / BODY</span></div>
-        <EditorialHtmlComposer initialValue={initial.bodyHtml} draftKey={initial.id ? `content-${initial.id}` : "new-content"} clearDraftKey={clearDraftKey} />
+        <EditorialHtmlComposer initialValue={initial.bodyHtml} draftKey={initial.id ? `content-${initial.id}` : "new-content"} clearDraftKey={clearDraftKey} mediaLibrary={mediaLibrary} />
         <label>Κατηγορίες, χωρισμένες με κόμμα<input name="categories" defaultValue={initial.categories} placeholder="Ακαδημία, Αγώνες, Ανακοινώσεις" /></label>
       </section>
       <section className="article-editor__panel" hidden={step !== 4}>

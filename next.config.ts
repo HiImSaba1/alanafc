@@ -14,6 +14,10 @@ const publicSecurityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  // Uploaded media is already converted into responsive WebP derivatives.
+  // Serve those files directly so shared-hosting/runtime uploads do not depend
+  // on the Next image proxy being able to reopen newly-created public files.
+  images: { unoptimized: true },
   serverExternalPackages: ["@node-rs/argon2", "drizzle-orm", "mysql2"],
   experimental: {
     cpus: 1,

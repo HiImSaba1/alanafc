@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "Alana FC",
   description: "Η επίσημη ιστοσελίδα της Alana FC Academy στην Αλεξανδρούπολη.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://alanafc.gr",
-  socialImage: "/alana_fc_academy_images_wordpress/academy_alana_header_1.jpg",
+  socialImage: "/alanafc-shared-links.jpg",
   email: "f.c.alana@hotmail.com",
   phone: "+306974924194",
   phoneDisplay: "697 492 4194",

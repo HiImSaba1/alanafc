@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeEditorHtml } from "@/features/content/core";
 import { parseEditorialDraft, type EditorialDraft } from "@/features/content/editor-draft";
 
 type Wrap = { label: string; before: string; after: string; fallback: string; title: string };
+type MediaChoice = { externalId: string; src: string; alt: string; filename: string; width: number | null; height: number | null };
 const controls: Wrap[] = [
   { label: "P", before: "<p>", after: "</p>", fallback: "Νέα παράγραφος", title: "Παράγραφος" },
   { label: "H2", before: "<h2>", after: "</h2>", fallback: "Νέος υπότιτλος", title: "Υπότιτλος" },
@@ -16,10 +18,12 @@ const controls: Wrap[] = [
 ];
 
 function plainText(value: string) { return value.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+function escapeAttribute(value: string) { return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-export function EditorialHtmlComposer({ initialValue, draftKey, clearDraftKey }: { initialValue: string; draftKey: string; clearDraftKey?: string }) {
+export function EditorialHtmlComposer({ initialValue, draftKey, clearDraftKey, mediaLibrary = [] }: { initialValue: string; draftKey: string; clearDraftKey?: string; mediaLibrary?: MediaChoice[] }) {
   const [value, setValue] = useState(initialValue);
   const [view, setView] = useState<"write" | "preview">("write");
+  const [showMedia, setShowMedia] = useState(false);
   const [recovery, setRecovery] = useState<EditorialDraft | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [draftStatus, setDraftStatus] = useState("Το τοπικό πρόχειρο ενεργοποιείται αυτόματα.");
@@ -77,10 +81,26 @@ export function EditorialHtmlComposer({ initialValue, draftKey, clearDraftKey }:
     window.requestAnimationFrame(() => { node.focus(); node.setSelectionRange(start + control.before.length, start + control.before.length + selected.length); });
   }
 
+  function insertMedia(item: MediaChoice) {
+    const node = textarea.current;
+    if (!node) return;
+    const start = node.selectionStart;
+    const end = node.selectionEnd;
+    const alt = escapeAttribute(item.alt || item.filename);
+    const width = item.width || 1600;
+    const height = item.height || 1100;
+    const html = `\n<figure><img src="${escapeAttribute(item.src)}" alt="${alt}" width="${width}" height="${height}" loading="lazy"><figcaption>${alt}</figcaption></figure>\n`;
+    setValue(`${value.slice(0, start)}${html}${value.slice(end)}`);
+    setShowMedia(false);
+    setView("write");
+    window.requestAnimationFrame(() => { node.focus(); node.setSelectionRange(start + html.length, start + html.length); });
+  }
+
   return <div className="editorial-html-composer">
     <input type="hidden" name="bodyHtml" value={value} />
     {recovery ? <div className="editorial-html-composer__recovery" role="status"><div><strong>Βρέθηκε μη αποθηκευμένο τοπικό πρόχειρο.</strong><span>{new Intl.DateTimeFormat("el-GR", { dateStyle: "short", timeStyle: "short" }).format(new Date(recovery.savedAt))}</span></div><div><button type="button" onClick={() => { setValue(recovery.bodyHtml); setRecovery(null); setDraftReady(true); }}>Επαναφορά</button><button type="button" onClick={() => { try { window.localStorage.removeItem(storageKey); } catch { /* Storage may be unavailable. */ } setRecovery(null); setDraftReady(true); }}>Απόρριψη</button></div></div> : null}
-    <header><div role="group" aria-label="Μορφοποίηση άρθρου">{controls.map((control) => <button key={control.title} type="button" title={control.title} aria-label={control.title} onClick={() => insert(control)}>{control.label}</button>)}</div><div role="group" aria-label="Προβολή editor"><button type="button" aria-pressed={view === "write"} onClick={() => setView("write")}>Σύνταξη</button><button type="button" aria-pressed={view === "preview"} onClick={() => setView("preview")}>Προεπισκόπηση</button></div></header>
+    <header><div role="group" aria-label="Μορφοποίηση άρθρου">{controls.map((control) => <button key={control.title} type="button" title={control.title} aria-label={control.title} onClick={() => insert(control)}>{control.label}</button>)}{mediaLibrary.length ? <button type="button" aria-expanded={showMedia} aria-controls="editor-inline-media" onClick={() => { setView("write"); setShowMedia((current) => !current); }}>+ Εικόνα στο κείμενο</button> : null}</div><div role="group" aria-label="Προβολή editor"><button type="button" aria-pressed={view === "write"} onClick={() => setView("write")}>Σύνταξη</button><button type="button" aria-pressed={view === "preview"} onClick={() => setView("preview")}>Προεπισκόπηση</button></div></header>
+    {showMedia ? <section className="editorial-html-composer__media" id="editor-inline-media" aria-label="Επιλογή εικόνας για το κείμενο"><header><div><strong>Εικόνα μέσα στο άρθρο</strong><span>Τοποθετήστε πρώτα τον κέρσορα ανάμεσα στις παραγράφους και επιλέξτε εικόνα.</span></div><button type="button" onClick={() => setShowMedia(false)}>Κλείσιμο</button></header><div>{mediaLibrary.map((item) => <button type="button" key={item.externalId} onClick={() => insertMedia(item)}><Image src={item.src} alt="" width={item.width || 320} height={item.height || 220} sizes="120px" /><span><strong>{item.alt || item.filename}</strong><small>Εισαγωγή εδώ</small></span></button>)}</div></section> : null}
     {view === "write" ? <label>Περιεχόμενο HTML<textarea ref={textarea} value={value} onChange={(event) => setValue(event.target.value)} rows={22} spellCheck={false} placeholder="<p>Γράψτε το περιεχόμενο του άρθρου…</p>" /></label> : <div className="editorial-html-composer__preview"><span>Προεπισκόπηση καθαρισμένου περιεχομένου</span>{safePreview ? <div className="rich-content" dangerouslySetInnerHTML={{ __html: safePreview }} /> : <p>Το άρθρο δεν έχει ακόμη περιεχόμενο.</p>}</div>}
     <footer><span>{words} λέξεις</span><span>Περίπου {minutes} λεπτά ανάγνωσης</span><span>{value.length.toLocaleString("el-GR")} χαρακτήρες HTML</span><span role="status">{draftStatus}</span></footer>
   </div>;

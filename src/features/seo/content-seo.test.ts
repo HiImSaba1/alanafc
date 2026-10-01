@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildContentSeo, buildSeoImageFilename, seoSlug } from "./content-seo";
+import { buildContentSeo, buildSeoImageFilename, firstContentImageSrc, seoSlug } from "./content-seo";
 
 describe("content SEO defaults", () => {
   it("creates stable ASCII names from Greek titles", () => {
@@ -14,5 +14,12 @@ describe("content SEO defaults", () => {
     const fallback = buildContentSeo({ title: "Τίτλος", bodyHtml: "<p>Καθαρό <strong>κείμενο</strong></p>" });
     expect(fallback.title).toContain("Alana FC Academy");
     expect(fallback.description).toBe("Καθαρό κείμενο");
+  });
+
+  it("uses only the first safe inline article image as a social fallback", () => {
+    expect(firstContentImageSrc('<p>Αρχή</p><figure><img src="/uploads/media/first.webp" alt="Πρώτη"></figure><img src="/second.webp">')).toBe("/uploads/media/first.webp");
+    expect(firstContentImageSrc('<img src="https://cdn.example.com/article.webp">')).toBe("https://cdn.example.com/article.webp");
+    expect(firstContentImageSrc('<img src="javascript:alert(1)">')).toBeNull();
+    expect(firstContentImageSrc("<p>Χωρίς εικόνα</p>")).toBeNull();
   });
 });
